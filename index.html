@@ -7,6 +7,1199 @@
 <meta name="description" content="Nutricionista em Viseu e Seia. Consultas de nutrição, planos alimentares personalizados, reeducação alimentar e apoio contínuo.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  /* ─── TOKENS ─────────────────────────────── */
+  :root {
+    --sage:       #7A9E87;
+    --sage-light: #A8C4B0;
+    --sage-pale:  #E8F0EB;
+    --sage-deep:  #4A7560;
+    --cream:      #F7F5F0;
+    --linen:      #EDE9E2;
+    --stone:      #6B6560;
+    --ink:        #2C2C2A;
+    --white:      #FFFFFF;
+
+    --serif: 'Cormorant Garamond', Georgia, serif;
+    --sans:  'DM Sans', system-ui, sans-serif;
+
+    --r: 6px;
+    --max: 1120px;
+  }
+
+  /* ─── RESET ──────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--sans);
+    font-weight: 300;
+    color: var(--ink);
+    background: var(--white);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { display: block; max-width: 100%; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ─── NAV ────────────────────────────────── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(247,245,240,0.94);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--linen);
+  }
+  .nav-inner {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 0 2rem;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-logo {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+  .nav-logo span { color: var(--sage-deep); font-style: italic; }
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--stone);
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--sage-deep); }
+  .nav-cta {
+    background: var(--sage-deep);
+    color: var(--white) !important;
+    padding: 0.6rem 1.4rem;
+    border-radius: 50px;
+    font-size: 0.82rem !important;
+    letter-spacing: 0.06em;
+    transition: background .2s !important;
+  }
+  .nav-cta:hover { background: var(--sage) !important; color: var(--white) !important; }
+
+  /* hamburger */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+  }
+  .hamburger span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--ink);
+    border-radius: 2px;
+    transition: all .3s;
+  }
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: 68px; left: 0; right: 0;
+    background: var(--cream);
+    padding: 2rem;
+    border-bottom: 1px solid var(--linen);
+    z-index: 99;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a {
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--stone);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--linen);
+  }
+  .mobile-menu .nav-cta {
+    display: inline-block;
+    text-align: center;
+    margin-top: 0.5rem;
+    color: var(--white) !important;
+    border-bottom: none;
+  }
+
+  /* ─── HERO ───────────────────────────────── */
+  .hero {
+    min-height: 100svh;
+    padding-top: 68px;
+    background: var(--cream);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    overflow: hidden;
+  }
+  .hero-text {
+    max-width: var(--max);
+    padding: 5rem 4rem 5rem 6rem;
+  }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sage-deep);
+    margin-bottom: 1.8rem;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 28px;
+    height: 1px;
+    background: var(--sage-deep);
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(2.8rem, 5vw, 4.2rem);
+    font-weight: 300;
+    line-height: 1.15;
+    color: var(--ink);
+    margin-bottom: 1.4rem;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--sage-deep);
+  }
+  .hero-sub {
+    font-size: 1rem;
+    color: var(--stone);
+    max-width: 420px;
+    margin-bottom: 2.8rem;
+    line-height: 1.8;
+  }
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .btn-primary {
+    background: var(--sage-deep);
+    color: var(--white);
+    padding: 0.85rem 2rem;
+    border-radius: 50px;
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    border: none;
+    cursor: pointer;
+    transition: background .2s, transform .15s;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: var(--sage); transform: translateY(-1px); }
+  .btn-outline {
+    border: 1.5px solid var(--sage-deep);
+    color: var(--sage-deep);
+    padding: 0.85rem 2rem;
+    border-radius: 50px;
+    font-size: 0.88rem;
+    letter-spacing: 0.04em;
+    display: inline-block;
+    transition: background .2s, color .2s;
+  }
+  .btn-outline:hover { background: var(--sage-deep); color: var(--white); }
+
+  .hero-locations {
+    margin-top: 3rem;
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.8rem;
+    color: var(--stone);
+    letter-spacing: 0.04em;
+  }
+  .hero-locations span {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .hero-locations svg { flex-shrink: 0; }
+
+  .hero-visual {
+    height: 100svh;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Illustrated placeholder — verde sage gradient com padrão botânico SVG */
+  .hero-visual-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, var(--sage-pale) 0%, var(--linen) 60%, var(--cream) 100%);
+  }
+  .hero-visual-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.13;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Ccircle cx='60' cy='20' r='3' fill='%234A7560'/%3E%3Cellipse cx='60' cy='60' rx='18' ry='30' fill='none' stroke='%234A7560' stroke-width='1.2'/%3E%3Cellipse cx='60' cy='60' rx='10' ry='25' fill='none' stroke='%234A7560' stroke-width='0.8'/%3E%3Cline x1='60' y1='30' x2='40' y2='55' stroke='%234A7560' stroke-width='1'/%3E%3Cline x1='60' y1='40' x2='80' y2='60' stroke='%234A7560' stroke-width='1'/%3E%3Cline x1='60' y1='50' x2='35' y2='70' stroke='%234A7560' stroke-width='1'/%3E%3Cline x1='60' y1='55' x2='85' y2='72' stroke='%234A7560' stroke-width='1'/%3E%3C/svg%3E");
+    background-size: 120px 120px;
+  }
+  .hero-card {
+    position: absolute;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--white);
+    border-radius: 16px;
+    padding: 1.4rem 1.8rem;
+    box-shadow: 0 8px 40px rgba(74,117,96,0.12);
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    white-space: nowrap;
+    min-width: 260px;
+  }
+  .hero-card-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--sage-pale);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .hero-card-text p { font-size: 0.75rem; color: var(--stone); margin-bottom: 0.1rem; }
+  .hero-card-text strong { font-size: 0.9rem; font-weight: 500; color: var(--ink); }
+
+  /* Photo placeholder circle */
+  .hero-photo-wrap {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -58%);
+    width: min(340px, 70%);
+    aspect-ratio: 3/4;
+    border-radius: 200px;
+    overflow: hidden;
+    background: linear-gradient(170deg, var(--sage-light) 0%, var(--sage) 100%);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .hero-photo-placeholder {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 2rem;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+  .hero-photo-placeholder svg { opacity: 0.5; margin-bottom: 0.5rem; }
+
+  /* ─── SECTION BASE ───────────────────────── */
+  .section {
+    padding: 7rem 2rem;
+  }
+  .container {
+    max-width: var(--max);
+    margin: 0 auto;
+  }
+  .section-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--sage-deep);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: var(--sage-deep);
+  }
+  .section-title {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 300;
+    line-height: 1.2;
+    color: var(--ink);
+    margin-bottom: 1.5rem;
+  }
+  .section-title em { font-style: italic; color: var(--sage-deep); }
+  .section-sub {
+    font-size: 0.95rem;
+    color: var(--stone);
+    max-width: 540px;
+    line-height: 1.9;
+  }
+
+  /* ─── SOBRE ──────────────────────────────── */
+  #sobre { background: var(--white); }
+  .sobre-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+  }
+  .sobre-visual {
+    position: relative;
+  }
+  .sobre-img-frame {
+    width: 100%;
+    aspect-ratio: 4/5;
+    border-radius: 200px 200px 24px 24px;
+    background: linear-gradient(160deg, var(--sage-pale) 0%, var(--sage-light) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .sobre-img-placeholder {
+    color: var(--sage-deep);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    opacity: 0.5;
+    text-align: center;
+  }
+  .sobre-badge {
+    position: absolute;
+    bottom: -1.5rem;
+    right: -1.5rem;
+    background: var(--sage-deep);
+    color: var(--white);
+    border-radius: 16px;
+    padding: 1.2rem 1.4rem;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(74,117,96,0.2);
+  }
+  .sobre-badge strong {
+    display: block;
+    font-family: var(--serif);
+    font-size: 2.2rem;
+    font-weight: 300;
+    line-height: 1;
+  }
+  .sobre-badge span {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    opacity: 0.85;
+  }
+  .sobre-content { }
+  .sobre-content p {
+    color: var(--stone);
+    font-size: 0.95rem;
+    line-height: 1.9;
+    margin-bottom: 1.2rem;
+  }
+  .sobre-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 2rem;
+  }
+  .pill {
+    background: var(--sage-pale);
+    color: var(--sage-deep);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+  }
+
+  /* ─── SERVIÇOS ───────────────────────────── */
+  #servicos { background: var(--cream); }
+  .servicos-intro {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 4rem;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+  .servicos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  .servico-card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 2.2rem 1.8rem;
+    border: 1px solid var(--linen);
+    transition: box-shadow .25s, transform .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .servico-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px;
+    height: 0;
+    background: var(--sage-deep);
+    transition: height .3s;
+    border-radius: 0 0 4px 0;
+  }
+  .servico-card:hover { box-shadow: 0 12px 40px rgba(74,117,96,0.1); transform: translateY(-3px); }
+  .servico-card:hover::before { height: 100%; }
+  .servico-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--sage-pale);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.4rem;
+  }
+  .servico-card h3 {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 0.7rem;
+  }
+  .servico-card p {
+    font-size: 0.87rem;
+    color: var(--stone);
+    line-height: 1.75;
+  }
+  .servico-card.destaque {
+    background: var(--sage-deep);
+    border-color: var(--sage-deep);
+    color: var(--white);
+  }
+  .servico-card.destaque .servico-icon { background: rgba(255,255,255,0.15); }
+  .servico-card.destaque h3 { color: var(--white); }
+  .servico-card.destaque p { color: rgba(255,255,255,0.75); }
+  .servico-card.destaque::before { background: var(--sage-light); }
+
+  /* ─── PROCESSO ───────────────────────────── */
+  #processo { background: var(--white); }
+  .processo-steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    margin-top: 4rem;
+    position: relative;
+  }
+  .processo-steps::before {
+    content: '';
+    position: absolute;
+    top: 28px;
+    left: calc(12.5% + 1rem);
+    right: calc(12.5% + 1rem);
+    height: 1px;
+    background: var(--linen);
+  }
+  .step {
+    text-align: center;
+    position: relative;
+  }
+  .step-num {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--sage-pale);
+    color: var(--sage-deep);
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.4rem;
+    position: relative;
+    z-index: 1;
+    border: 2px solid var(--sage-light);
+  }
+  .step h4 {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+  .step p {
+    font-size: 0.83rem;
+    color: var(--stone);
+    line-height: 1.7;
+  }
+
+  /* ─── MARCAÇÕES ──────────────────────────── */
+  #marcacoes { background: var(--sage-pale); }
+  .marcacoes-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 5rem;
+    align-items: start;
+  }
+  .marcacoes-info p {
+    font-size: 0.92rem;
+    color: var(--stone);
+    margin-bottom: 1.5rem;
+    line-height: 1.9;
+  }
+  .contact-list {
+    list-style: none;
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+  .contact-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.9rem;
+    color: var(--ink);
+  }
+  .contact-list .icon-wrap {
+    width: 36px;
+    height: 36px;
+    background: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(74,117,96,0.1);
+  }
+  .marcacoes-form {
+    background: var(--white);
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 40px rgba(74,117,96,0.08);
+  }
+  .marcacoes-form h3 {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 1.8rem;
+  }
+  .form-group {
+    margin-bottom: 1.2rem;
+  }
+  .form-group label {
+    display: block;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--stone);
+    margin-bottom: 0.4rem;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--linen);
+    border-radius: 10px;
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    color: var(--ink);
+    background: var(--cream);
+    outline: none;
+    transition: border-color .2s, background .2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--sage);
+    background: var(--white);
+  }
+  .form-group textarea { resize: vertical; min-height: 100px; }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .form-submit {
+    width: 100%;
+    padding: 1rem;
+    background: var(--sage-deep);
+    color: var(--white);
+    border: none;
+    border-radius: 50px;
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: background .2s;
+  }
+  .form-submit:hover { background: var(--sage); }
+  .form-note {
+    font-size: 0.75rem;
+    color: var(--stone);
+    text-align: center;
+    margin-top: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+  /* success state */
+  .form-success {
+    display: none;
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+  .form-success .check {
+    width: 64px;
+    height: 64px;
+    background: var(--sage-pale);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+  }
+  .form-success h4 { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; color: var(--ink); margin-bottom: 0.6rem; }
+  .form-success p { font-size: 0.88rem; color: var(--stone); }
+
+  /* whatsapp float */
+  .whatsapp-float {
+    position: fixed;
+    bottom: 1.8rem;
+    right: 1.8rem;
+    z-index: 50;
+    background: #25D366;
+    color: white;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+    transition: transform .2s;
+    cursor: pointer;
+  }
+  .whatsapp-float:hover { transform: scale(1.08); }
+
+  /* ─── TESTEMUNHOS ────────────────────────── */
+  #testemunhos { background: var(--cream); }
+  .testemunhos-intro { text-align: center; margin-bottom: 3.5rem; }
+  .testemunhos-intro .section-label { justify-content: center; }
+  .testemunhos-intro .section-label::before { display: none; }
+  .testemunhos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  .testemunho-card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 1px solid var(--linen);
+  }
+  .stars {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 1rem;
+    color: var(--sage);
+  }
+  .testemunho-card blockquote {
+    font-size: 0.9rem;
+    color: var(--stone);
+    line-height: 1.8;
+    margin-bottom: 1.2rem;
+    font-style: italic;
+    font-family: var(--serif);
+    font-size: 1rem;
+  }
+  .testemunho-autor {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+  }
+
+  /* ─── FOOTER ─────────────────────────────── */
+  footer {
+    background: var(--ink);
+    color: rgba(255,255,255,0.65);
+    padding: 4rem 2rem 2rem;
+  }
+  .footer-inner {
+    max-width: var(--max);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .footer-brand .nav-logo { color: var(--white); margin-bottom: 0.8rem; display: block; }
+  .footer-brand p { font-size: 0.85rem; line-height: 1.8; }
+  footer h5 {
+    color: var(--white);
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    font-weight: 400;
+  }
+  .footer-links { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+  .footer-links a { font-size: 0.85rem; transition: color .2s; }
+  .footer-links a:hover { color: var(--sage-light); }
+  .footer-bottom {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding-top: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    opacity: 0.5;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* ─── RESPONSIVE ─────────────────────────── */
+  @media (max-width: 900px) {
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    .hero { grid-template-columns: 1fr; min-height: auto; }
+    .hero-text { padding: 3rem 2rem; }
+    .hero-visual { height: 50vw; min-height: 300px; }
+    .sobre-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .sobre-badge { right: 0; bottom: -2rem; }
+    .servicos-grid { grid-template-columns: 1fr 1fr; }
+    .processo-steps { grid-template-columns: 1fr 1fr; }
+    .processo-steps::before { display: none; }
+    .marcacoes-wrap { grid-template-columns: 1fr; gap: 3rem; }
+    .testemunhos-grid { grid-template-columns: 1fr 1fr; }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .servicos-grid { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .testemunhos-grid { grid-template-columns: 1fr; }
+    .footer-inner { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 2.4rem; }
+  }
+
+  /* scroll reveal */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+</style>
 </head>
-<body>See full file</body>
+<body>
+
+<!-- ── NAV ─────────────────────────────────── -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">Filipa Rebelo <span>Nutricionista</span></a>
+    <ul class="nav-links">
+      <li><a href="#sobre">Sobre</a></li>
+      <li><a href="#servicos">Serviços</a></li>
+      <li><a href="#processo">Como Funciona</a></li>
+      <li><a href="#marcacoes" class="nav-cta">Marcar Consulta</a></li>
+    </ul>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#sobre" onclick="toggleMenu()">Sobre</a>
+  <a href="#servicos" onclick="toggleMenu()">Serviços</a>
+  <a href="#processo" onclick="toggleMenu()">Como Funciona</a>
+  <a href="#marcacoes" class="nav-cta" onclick="toggleMenu()">Marcar Consulta</a>
+</div>
+
+<!-- ── HERO ─────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-text">
+    <div class="hero-eyebrow">Nutricionista C.P. 2767N · Viseu & Seia</div>
+    <h1>A alimentação certa<br>para a <em>tua vida real</em></h1>
+    <p class="hero-sub">Acompanhamento nutricional personalizado que se adapta ao teu ritmo, rotina e objetivos — sem regras rígidas nem soluções genéricas.</p>
+    <div class="hero-actions">
+      <a href="#marcacoes" class="btn-primary">Marcar Consulta</a>
+      <a href="#servicos" class="btn-outline">Ver Serviços</a>
+    </div>
+    <div class="hero-locations">
+      <span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Viseu
+      </span>
+      <span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Seia
+      </span>
+      <span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Consulta Online
+      </span>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-visual-bg"></div>
+    <div class="hero-visual-pattern"></div>
+    <div class="hero-photo-wrap">
+      <div class="hero-photo-placeholder">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <div>Foto da Filipa</div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-card-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A7560" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      </div>
+      <div class="hero-card-text">
+        <p>Acompanhamento contínuo</p>
+        <strong>Apoio pelo WhatsApp incluído</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SOBRE ─────────────────────────────────── -->
+<section class="section" id="sobre">
+  <div class="container">
+    <div class="sobre-grid">
+      <div class="sobre-visual reveal">
+        <div class="sobre-img-frame">
+          <div class="sobre-img-placeholder">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#4A7560" stroke-width="1"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <div style="margin-top:.5rem; font-size:.7rem; letter-spacing:.08em;">Foto da Filipa</div>
+          </div>
+        </div>
+        <div class="sobre-badge">
+          <strong>+12</strong>
+          <span>anos de<br>experiência</span>
+        </div>
+      </div>
+      <div class="sobre-content reveal">
+        <div class="section-label">Sobre mim</div>
+        <h2 class="section-title">Olá, sou a <em>Filipa Rebelo</em></h2>
+        <p>Sou nutricionista (C.P. 2767N) com mais de 12 anos de experiência, com consultas presenciais em Viseu e Seia, e também online. Acredito que uma alimentação saudável não tem de ser complicada — tem de ser real, adaptada à tua vida e sustentável a longo prazo.</p>
+        <p>O meu trabalho não passa por dar listas de alimentos proibidos. Passa por te ajudar a perceber o teu corpo, os teus hábitos e construir uma relação positiva com a comida — seja qual for o teu ponto de partida.</p>
+        <p>Tenho especial interesse em nutrição para pessoas que trabalham por turnos, uma área onde pequenas mudanças fazem uma diferença enorme no bem-estar e na qualidade de vida diária.</p>
+        <div class="sobre-pills">
+          <span class="pill">Nutrição Clínica</span>
+          <span class="pill">Reeducação Alimentar</span>
+          <span class="pill">Trabalhadores por Turnos</span>
+          <span class="pill">Planos Personalizados</span>
+          <span class="pill">Consulta Online</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SERVIÇOS ───────────────────────────────── -->
+<section class="section" id="servicos">
+  <div class="container">
+    <div class="servicos-intro">
+      <div>
+        <div class="section-label">Serviços</div>
+        <h2 class="section-title">Como te posso<br><em>acompanhar</em></h2>
+      </div>
+      <a href="#marcacoes" class="btn-outline">Marcar consulta</a>
+    </div>
+    <div class="servicos-grid">
+
+      <div class="servico-card reveal">
+        <div class="servico-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A7560" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <h3>Consulta de Nutrição</h3>
+        <p>Avaliação completa do teu estado nutricional, hábitos alimentares e objetivos. Presencial em Viseu ou Seia, ou online.</p>
+      </div>
+
+      <div class="servico-card reveal">
+        <div class="servico-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A7560" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <h3>Plano Alimentar Personalizado</h3>
+        <p>Um plano construído à tua medida — adaptado às tuas preferências, rotina, objetivos e condição de saúde.</p>
+      </div>
+
+      <div class="servico-card reveal">
+        <div class="servico-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A7560" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3>Reeducação Alimentar</h3>
+        <p>Um processo gradual para mudar a tua relação com a comida de forma duradoura, sem dietas restritivas ou regras rígidas.</p>
+      </div>
+
+      <div class="servico-card destaque reveal">
+        <div class="servico-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .91h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+        </div>
+        <h3>Apoio pelo WhatsApp</h3>
+        <p>Acompanhamento entre consultas para tirar dúvidas, partilhar refeições e manter a motivação no dia a dia.</p>
+      </div>
+
+      <div class="servico-card reveal">
+        <div class="servico-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A7560" stroke-width="1.8"><path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+        </div>
+        <h3>Ementas Semanais</h3>
+        <p>Ementas práticas e variadas para toda a família ou para ti, com sugestões de compras e preparação rápida.</p>
+      </div>
+
+      <div class="servico-card reveal">
+        <div class="servico-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A7560" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3>Nutrição para Turnos</h3>
+        <p>Planeamento alimentar específico para profissionais com horários rotativos — respeitar o teu ciclo é fundamental para o teu bem-estar.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── PROCESSO ───────────────────────────────── -->
+<section class="section" id="processo">
+  <div class="container">
+    <div style="text-align:center; max-width:500px; margin:0 auto 0;">
+      <div class="section-label" style="justify-content:center"><span style="display:none">::before</span>Como funciona</div>
+      <h2 class="section-title">Do primeiro passo à <em>mudança real</em></h2>
+    </div>
+    <div class="processo-steps">
+      <div class="step reveal">
+        <div class="step-num">1</div>
+        <h4>Marcas a consulta</h4>
+        <p>Escolhes o serviço, a data e preferes presencial (Viseu ou Seia) ou online.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">2</div>
+        <h4>Primeira consulta</h4>
+        <p>Falamos sobre os teus hábitos, objetivos, rotina e historial de saúde.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">3</div>
+        <h4>Recebes o teu plano</h4>
+        <p>Um plano personalizado e ementas adaptadas à tua vida real.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">4</div>
+        <h4>Acompanhamento</h4>
+        <p>Apoio contínuo por WhatsApp e consultas de seguimento ao teu ritmo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MARCAÇÕES ─────────────────────────────── -->
+<section class="section" id="marcacoes">
+  <div class="container">
+    <div class="marcacoes-wrap">
+      <div class="marcacoes-info reveal">
+        <div class="section-label">Marcações</div>
+        <h2 class="section-title">Pronta para<br><em>começar?</em></h2>
+        <p>Preenche o formulário e entro em contacto em breve para confirmar a consulta e esclarecer qualquer dúvida.</p>
+        <p>Se preferires, podes contactar diretamente pelo WhatsApp ou e-mail — responderei assim que possível!</p>
+        <ul class="contact-list">
+          <li>
+            <div class="icon-wrap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A7560" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .91h3a2 2 0 012 1.72c.12.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.58 2.81.7A2 2 0 0122 16.92z"/></svg>
+            </div>
+          <a href="https://wa.me/message/FV7FQDPR5EV2M1" target="_blank" style="color:inherit;">WhatsApp: 963 320 311</a>
+          </li>
+          <li>
+            <div class="icon-wrap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A7560" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+          <a href="mailto:filipa.rebelo@live.com.pt">filipa.rebelo@live.com.pt</a>
+          </li>
+          <li>
+            <div class="icon-wrap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A7560" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            Viseu · Seia · Online
+          </li>
+        </ul>
+      </div>
+
+      <div class="marcacoes-form reveal">
+        <div id="formContent">
+          <h3>Pedir marcação</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nome</label>
+              <input type="text" placeholder="O teu nome" id="f-nome">
+            </div>
+            <div class="form-group">
+              <label>Apelido</label>
+              <input type="text" placeholder="O teu apelido">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>E-mail</label>
+            <input type="email" placeholder="email@exemplo.pt" id="f-email">          </div>
+          <div class="form-group">
+            <label>Telemóvel</label>
+            <input type="tel" placeholder="+351 9XX XXX XXX">
+          </div>
+          <div class="form-group">
+            <label>Serviço</label>
+            <select id="f-servico">
+              <option value="" disabled selected>Escolhe um serviço</option>
+              <option>Consulta de Nutrição</option>
+              <option>Plano Alimentar Personalizado</option>
+              <option>Reeducação Alimentar</option>
+              <option>Ementas Semanais</option>
+              <option>Nutrição para Trabalhadores por Turnos</option>
+              <option>Pacote Completo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Modalidade</label>
+            <select>
+              <option value="" disabled selected>Presencial ou online?</option>
+              <option>Presencial — Viseu</option>
+              <option>Presencial — Seia</option>
+              <option>Online (videochamada)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Mensagem (opcional)</label>
+            <textarea placeholder="Conta-me um pouco sobre os teus objetivos ou dúvidas…"></textarea>
+          </div>
+          <button class="form-submit" onclick="submitForm()">Enviar pedido de marcação</button>
+          <p class="form-note">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            Os teus dados são confidenciais e nunca partilhados.
+          </p>
+        </div>
+        <div class="form-success" id="formSuccess">
+          <div class="check">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4A7560" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          </div>
+          <h4>Pedido enviado!</h4>
+          <p>Obrigada pelo teu interesse. Entrarei em contacto em menos de 24 horas para confirmar a tua consulta.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTEMUNHOS ────────────────────────────── -->
+<section class="section" id="testemunhos">
+  <div class="container">
+    <div class="testemunhos-intro reveal">
+      <div class="section-label">Testemunhos</div>
+      <h2 class="section-title">O que dizem as <em>minhas clientes</em></h2>
+    </div>
+    <div class="testemunhos-grid">
+      <div class="testemunho-card reveal">
+        <div class="stars">★★★★★</div>
+        <blockquote>"A Filipa mudou completamente a minha relação com a comida. Sem restrições absurdas, com muita paciência e explicações que fazem sentido."</blockquote>
+        <div class="testemunho-autor">— Ana S., Viseu</div>
+      </div>
+      <div class="testemunho-card reveal">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Trabalho por turnos há 10 anos e nunca tinha conseguido manter uma alimentação equilibrada. Com o plano da Filipa finalmente consigo."</blockquote>
+        <div class="testemunho-autor">— Ricardo M., Seia</div>
+      </div>
+      <div class="testemunho-card reveal">
+        <div class="stars">★★★★★</div>
+        <blockquote>"O apoio pelo WhatsApp é um luxo. Tenho sempre alguém a quem recorrer quando tenho dúvidas ou quando estou a ceder a tentações!"</blockquote>
+        <div class="testemunho-autor">— Marta F., Online</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo">Filipa Rebelo <span>Nutricionista</span></a>
+      <p>Acompanhamento nutricional personalizado em Viseu, Seia e online. Porque a alimentação certa é aquela que funciona para a tua vida.</p>
+    </div>
+    <div>
+      <h5>Navegação</h5>
+      <ul class="footer-links">
+        <li><a href="#sobre">Sobre mim</a></li>
+        <li><a href="#servicos">Serviços</a></li>
+        <li><a href="#processo">Como funciona</a></li>
+        <li><a href="#marcacoes">Marcar consulta</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Contacto</h5>
+      <ul class="footer-links">
+        <li><a href="https://wa.me/message/FV7FQDPR5EV2M1" target="_blank">WhatsApp · 963 320 311</a></li>
+        <li><a href="https://www.instagram.com/filiparebelo_nutricionista" target="_blank">Instagram</a></li>
+        <li><a href="mailto:filipa.rebelo@live.com.pt">filipa.rebelo@live.com.pt</a></li>
+        <li><a href="#">Viseu · Seia · Online</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Filipa Rebelo Nutricionista</span>
+    <span>Política de Privacidade</span>
+  </div>
+</footer>
+
+<!-- ── WHATSAPP FLOAT ──────────────────────────── -->
+<a class="whatsapp-float" href="https://wa.me/message/FV7FQDPR5EV2M1" target="_blank" title="Falar no WhatsApp">
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<script>
+  // Mobile menu
+  function toggleMenu() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Form submit
+  function submitForm() {
+    const nome = document.getElementById('f-nome').value;
+    const email = document.getElementById('f-email').value;
+    if (!nome || !email) {
+      alert('Por favor preenche pelo menos o nome e e-mail.');
+      return;
+    }
+    document.getElementById('formContent').style.display = 'none';
+    document.getElementById('formSuccess').style.display = 'block';
+  }
+
+  // Smooth nav highlight
+  const sections = document.querySelectorAll('section[id]');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 100) current = s.id;
+    });
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.style.color = a.getAttribute('href') === `#${current}` ? 'var(--sage-deep)' : '';
+    });
+  });
+</script>
+</body>
 </html>

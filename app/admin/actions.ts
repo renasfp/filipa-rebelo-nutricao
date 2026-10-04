@@ -1,15 +1,39 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { checkPassword, endSession, requireAdmin, startSession } from "@/lib/auth";
-import { getRequest, saveConfig, saveRequest } from "@/lib/booking/store";
+import {
+  deleteKey,
+  getCounter,
+  getRequest,
+  incrementCounter,
+  saveConfig,
+  saveRequest,
+} from "@/lib/booking/store";
 import { timeToMinutes } from "@/lib/booking/time";
 import type { BookingConfig, BookingStatus, Weekday } from "@/lib/booking/types";
 
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOGIN_WINDOW_SECONDS = 15 * 60;
+
 export async function login(_prev: string | null, formData: FormData): Promise<string | null> {
   if (!process.env.ADMIN_PASSWORD) return "ADMIN_PASSWORD não está configurada no servidor.";
-  if (!checkPassword(String(formData.get("password") ?? ""))) return "Palavra-passe incorreta.";
+
+  const h = await headers();
+  const ip = h.get("x-real-ip") ?? h.get("x-forwarded-for")?.split(",")[0].trim() ?? "desconhecido";
+  const key = `login-fails:${ip}`;
+  const blocked = `Demasiadas tentativas falhadas. Tenta de novo daqui a ${LOGIN_WINDOW_SECONDS / 60} minutos.`;
+
+  if ((await getCounter(key)) >= MAX_LOGIN_ATTEMPTS) return blocked;
+  if (!checkPassword(String(formData.get("password") ?? ""))) {
+    const fails = await incrementCounter(key, LOGIN_WINDOW_SECONDS);
+    const left = MAX_LOGIN_ATTEMPTS - fails;
+    return left > 0 ? `Palavra-passe incorreta. Restam ${left} tentativa${left === 1 ? "" : "s"}.` : blocked;
+  }
+
+  await deleteKey(key);
   await startSession();
   redirect("/admin");
 }

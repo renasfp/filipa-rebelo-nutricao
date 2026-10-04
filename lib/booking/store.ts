@@ -1,26 +1,26 @@
 import { promises as fs } from "fs";
 import path from "path";
+import { createClient, type RedisClientType } from "redis";
 import { DEFAULT_CONFIG, type BookingConfig, type BookingRequest } from "./types";
 
-// Em produção usa Redis (Upstash, via Vercel Marketplace) através da API REST.
-// Sem essas variáveis, guarda tudo num ficheiro JSON local (.data/db.json) — só para desenvolvimento.
+// Em produção usa Redis (REDIS_URL, criado pela integração Redis da Vercel).
+// Sem essa variável, guarda tudo num ficheiro JSON local (.data/db.json) — só para desenvolvimento.
 
 const CONFIG_KEY = "booking:config";
 const REQUESTS_KEY = "booking:requests";
 
-const redisUrl = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
-const redisToken = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
+const redisUrl = process.env.REDIS_URL;
+let client: Promise<RedisClientType> | undefined;
+
+function getClient() {
+  client ??= createClient({ url: redisUrl })
+    .on("error", (err) => console.error("[redis]", err))
+    .connect() as Promise<RedisClientType>;
+  return client;
+}
 
 async function redis<T>(...command: string[]): Promise<T> {
-  const res = await fetch(redisUrl!, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${redisToken}` },
-    body: JSON.stringify(command),
-    cache: "no-store",
-  });
-  const body = await res.json();
-  if (!res.ok || body.error) throw new Error(`Redis: ${body.error ?? res.status}`);
-  return body.result as T;
+  return (await (await getClient()).sendCommand(command)) as T;
 }
 
 type FileDb = Record<string, unknown>;

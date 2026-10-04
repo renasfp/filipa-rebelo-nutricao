@@ -1,14 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const NAV_LINKS = [
-  { href: "#about", label: "Sobre" },
-  { href: "#services", label: "Serviços" },
-  { href: "#process", label: "Como Funciona" },
+  { href: "/#about", label: "Sobre" },
+  { href: "/#services", label: "Serviços" },
+  { href: "/#process", label: "Como Funciona" },
 ];
 
-const BOOKING_LINK = "https://nutrium.com/p/filiparebelo4499/schedule";
+const BOOKING_LINK = "/marcar-consulta";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -34,21 +35,21 @@ export default function Navbar() {
     <>
       <nav>
         <div className="nav-inner">
-          <a href="#" className="nav-logo">
+          <Link href="/" className="nav-logo">
             Filipa Rebelo <span>Nutricionista</span>
-          </a>
+          </Link>
           <ul className="nav-links">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
-                <a href={link.href} className={active === link.href.slice(1) ? "active" : ""}>
+                <Link href={link.href} className={active === link.href.slice(2) ? "active" : ""}>
                   {link.label}
-                </a>
+                </Link>
               </li>
             ))}
             <li>
-              <a href={BOOKING_LINK} target="_blank" rel="noreferrer" className="nav-cta">
+              <Link href={BOOKING_LINK} className="nav-cta">
                 Marcar Consulta
-              </a>
+              </Link>
             </li>
           </ul>
           <button className="hamburger" onClick={() => setMenuOpen((v) => !v)} aria-label="Menu">
@@ -60,13 +61,13 @@ export default function Navbar() {
       </nav>
       <div className={`mobile-menu${menuOpen ? " open" : ""}`}>
         {NAV_LINKS.map((link) => (
-          <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>
+          <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>
             {link.label}
-          </a>
+          </Link>
         ))}
-        <a href={BOOKING_LINK} target="_blank" rel="noreferrer" className="nav-cta">
+        <Link href={BOOKING_LINK} className="nav-cta" onClick={() => setMenuOpen(false)}>
           Marcar Consulta
-        </a>
+        </Link>
       </div>
     </>
   );

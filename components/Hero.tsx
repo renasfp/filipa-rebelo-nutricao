@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Hero() {
   return (
     <section className="hero">
@@ -13,14 +15,9 @@ export default function Hero() {
           objetivos — sem regras rígidas nem soluções genéricas.
         </p>
         <div className="hero-actions">
-          <a
-            href="https://nutrium.com/p/filiparebelo4499/schedule"
-            target="_blank"
-            rel="noreferrer"
-            className="btn-primary"
-          >
+          <Link href="/marcar-consulta" className="btn-primary">
             Marcar Consulta
-          </a>
+          </Link>
           <a href="#services" className="btn-outline">
             Ver Serviços
           </a>

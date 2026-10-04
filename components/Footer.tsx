@@ -1,11 +1,13 @@
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer>
       <div className="footer-inner">
         <div className="footer-brand">
-          <a href="#" className="nav-logo">
+          <Link href="/" className="nav-logo">
             Filipa Rebelo <span>Nutricionista</span>
-          </a>
+          </Link>
           <p>
             Acompanhamento nutricional personalizado em Viseu, Seia e online. Porque a
             alimentação certa é aquela que funciona para a sua vida.
@@ -15,22 +17,16 @@ export default function Footer() {
           <h5>Navegação</h5>
           <ul className="footer-links">
             <li>
-              <a href="#about">Sobre mim</a>
+              <Link href="/#about">Sobre mim</Link>
             </li>
             <li>
-              <a href="#services">Serviços</a>
+              <Link href="/#services">Serviços</Link>
             </li>
             <li>
-              <a href="#process">Como funciona</a>
+              <Link href="/#process">Como funciona</Link>
             </li>
             <li>
-              <a
-                href="https://nutrium.com/p/filiparebelo4499/schedule"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Marcar consulta
-              </a>
+              <Link href="/marcar-consulta">Marcar consulta</Link>
             </li>
           </ul>
         </div>

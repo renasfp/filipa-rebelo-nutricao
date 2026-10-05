@@ -1,20 +1,11 @@
 import { addDays, lisbonToUtc, minutesToTime, timeToMinutes, todayInLisbon, weekdayOf } from "./time";
+import { getGoogleBusy } from "./google-calendar";
 import { getConfig, listRequests } from "./store";
 import type { AvailableDay, BookingConfig, BookingRequest, Location } from "./types";
 
 export interface BusyInterval {
   start: Date;
   end: Date;
-}
-
-/**
- * Períodos ocupados vindos de calendários externos, entre `from` e `to`.
- * TODO: ligar à API FreeBusy do Google Calendar (Zappy x2 + Nutrium sincronizados lá).
- */
-async function getExternalBusy(from: Date, to: Date): Promise<BusyInterval[]> {
-  void from;
-  void to;
-  return [];
 }
 
 function requestsAsBusy(requests: BookingRequest[]): BusyInterval[] {
@@ -65,7 +56,7 @@ export async function getAvailability(locationId: string) {
 
   const now = new Date();
   const horizon = lisbonToUtc(addDays(todayInLisbon(now), config.maxDaysAhead + 1), "00:00");
-  const [requests, external] = await Promise.all([listRequests(), getExternalBusy(now, horizon)]);
+  const [requests, external] = await Promise.all([listRequests(), getGoogleBusy(now, horizon)]);
   const busy = [...requestsAsBusy(requests), ...external];
 
   return { config, location, days: computeAvailability(config, location, busy, now) };

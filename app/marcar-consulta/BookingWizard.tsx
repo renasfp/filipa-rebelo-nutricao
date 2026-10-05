@@ -184,12 +184,14 @@ export default function BookingWizard({ locations }: { locations: Location[] }) 
                     <div className="booking-slots">
                       {byDate.get(date)!.map((slot) => (
                         <button
-                          key={slot}
+                          key={slot.time}
                           type="button"
-                          className={`booking-slot${time === slot ? " selected" : ""}`}
-                          onClick={() => setTime(slot)}
+                          disabled={!slot.free}
+                          aria-label={slot.free ? undefined : `${slot.time}, ocupado`}
+                          className={`booking-slot${time === slot.time ? " selected" : ""}`}
+                          onClick={() => setTime(slot.time)}
                         >
-                          {slot}
+                          {slot.time}
                         </button>
                       ))}
                     </div>

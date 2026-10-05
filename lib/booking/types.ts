@@ -43,9 +43,15 @@ export interface BookingRequest {
   notes: string;
 }
 
+export interface Slot {
+  time: string;
+  /** false quando o horário já está ocupado (mostrado riscado, sem poder ser escolhido). */
+  free: boolean;
+}
+
 export interface AvailableDay {
   date: string;
-  slots: string[];
+  slots: Slot[];
 }
 
 export const WEEKDAY_NAMES = [

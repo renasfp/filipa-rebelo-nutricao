@@ -1119,8 +1119,17 @@ footer h5 {
   transition: background .15s;
 }
 
-.booking-slot:hover {
+.booking-slot:hover:not(:disabled) {
   background: var(--sage-pale);
+}
+
+.booking-slot:disabled {
+  border-color: var(--linen);
+  background: transparent;
+  color: var(--stone);
+  text-decoration: line-through;
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .booking-slot.selected {

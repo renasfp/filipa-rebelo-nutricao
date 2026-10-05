@@ -1,7 +1,7 @@
 import { addDays, lisbonToUtc, minutesToTime, timeToMinutes, todayInLisbon, weekdayOf } from "./time";
 import { getGoogleBusy } from "./google-calendar";
 import { getConfig, listRequests } from "./store";
-import type { AvailableDay, BookingConfig, BookingRequest, Location } from "./types";
+import type { AvailableDay, BookingConfig, BookingRequest, Location, Slot } from "./types";
 
 export interface BusyInterval {
   start: Date;
@@ -34,15 +34,15 @@ export function computeAvailability(
     const hours = config.hours[weekday];
     if (!hours || !location.weekdays.includes(weekday as Location["weekdays"][number])) continue;
 
-    const slots: string[] = [];
+    const slots: Slot[] = [];
     const end = timeToMinutes(hours.end);
     for (let t = timeToMinutes(hours.start); t + config.slotMinutes <= end; t += config.slotMinutes) {
       const time = minutesToTime(t);
       const start = lisbonToUtc(date, time).getTime();
       const finish = start + config.slotMinutes * 60000;
       if (start < earliest) continue;
-      if (busy.some((b) => start < b.end.getTime() && finish > b.start.getTime())) continue;
-      slots.push(time);
+      const taken = busy.some((b) => start < b.end.getTime() && finish > b.start.getTime());
+      slots.push({ time, free: !taken });
     }
     if (slots.length) days.push({ date, slots });
   }

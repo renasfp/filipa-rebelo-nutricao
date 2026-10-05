@@ -40,7 +40,7 @@ export async function requestBooking(
 
   const availability = await getAvailability(locationId);
   if (!availability) return { status: "error", message: "Local inválido." };
-  const stillFree = availability.days.some((d) => d.date === date && d.slots.includes(time));
+  const stillFree = availability.days.some((d) => d.date === date && d.slots.some((s) => s.time === time && s.free));
   if (!stillFree) {
     return {
       status: "slot-taken",

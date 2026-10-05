@@ -1422,6 +1422,11 @@ footer h5 {
   margin: 1.2rem 0 1.5rem;
 }
 
+.construction-text {
+  color: var(--stone);
+  margin: -0.8rem 0 1.5rem;
+}
+
 .admin-form {
   display: flex;
   flex-direction: column;

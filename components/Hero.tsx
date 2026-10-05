@@ -6,12 +6,11 @@ export default function Hero() {
       <div className="hero-text">
         <div className="hero-eyebrow">Nutricionista C.P. 2767N · Viseu & Seia</div>
         <h1>
-          A alimentação certa
-          <br />
-          para a <em>sua vida real</em>
+          O cuidado nutricional <br/> 
+          <em> que cabe na sua vida</em>
         </h1>
         <p className="hero-sub">
-          Acompanhamento nutricional personalizado que se adapta ao teu ritmo, rotina e
+          Acompanhamento nutricional personalizado que se adapta ao seu ritmo, rotina e
           objetivos — sem regras rígidas nem soluções genéricas.
         </p>
         <div className="hero-actions">
@@ -63,6 +62,6 @@ export default function Hero() {
           </div>
         </div>
       </div>
-    </section>
+    </section >
   );
 }

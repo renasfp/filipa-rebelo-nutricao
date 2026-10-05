@@ -725,6 +725,44 @@ nav {
   margin-bottom: 1.2rem;
   font-style: italic;
   font-family: var(--serif);
+  white-space: pre-line;
+}
+
+.testimonial-card blockquote.clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 7;
+  line-clamp: 7;
+  overflow: hidden;
+}
+
+.testimonial-more {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: -0.6rem 0 1.2rem;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--sage-deep);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.testimonials-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 2.5rem;
+  font-size: 0.9rem;
+  color: var(--stone);
+}
+
+.testimonials-google strong {
+  color: var(--ink);
+  font-weight: 500;
 }
 
 .testimonial-author {

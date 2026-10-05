@@ -39,8 +39,8 @@ export default function About() {
               sustentável a longo prazo.
             </p>
             <p>
-              O meu trabalho não passa por dar listas de alimentos proibidos. Passa por te
-              ajudar a perceber o teu corpo, os teus hábitos e construir uma relação positiva
+              O meu trabalho não passa por dar listas de alimentos proibidos. Passa por
+              ajudar a perceber o seu corpo, os seus hábitos e construir uma relação positiva
               com a comida — seja qual for o teu ponto de partida.
             </p>
             <p>

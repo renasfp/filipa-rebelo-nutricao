@@ -1167,6 +1167,7 @@ footer h5 {
 
 .booking-fields input,
 .booking-fields textarea,
+.booking-fields select,
 .access-form input {
   font-family: var(--sans);
   font-size: 0.95rem;
@@ -1181,6 +1182,7 @@ footer h5 {
 
 .booking-fields input:focus,
 .booking-fields textarea:focus,
+.booking-fields select:focus,
 .access-form input:focus {
   outline: 2px solid var(--sage-light);
   border-color: var(--sage);
@@ -1192,7 +1194,30 @@ footer h5 {
   gap: 0.6rem;
 }
 
-.booking-consent input {
+.booking-options {
+  border: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.2rem;
+  font-size: 0.82rem;
+  color: var(--stone);
+}
+
+.booking-options legend {
+  width: 100%;
+  margin-bottom: 0.35rem;
+}
+
+.booking-fields .booking-options label {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.booking-consent input,
+.booking-options input {
   width: auto;
   margin-top: 0.3rem;
 }

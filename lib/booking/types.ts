@@ -1,6 +1,15 @@
 /** 0 = domingo … 6 = sábado (como Date.getDay). */
 export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
+/** Campo personalizado do formulário de marcação, definido no tipo de evento do Cal.com. */
+export interface BookingField {
+  slug: string;
+  type: "text" | "number" | "textarea" | "radio" | "select" | "checkbox" | "boolean";
+  label: string;
+  required: boolean;
+  options: string[];
+}
+
 /** Um tipo de consulta corresponde a um tipo de evento (visível) no Cal.com. */
 export interface Location {
   /** Slug do tipo de evento no Cal.com. */
@@ -13,6 +22,7 @@ export interface Location {
   online: boolean;
   /** Dias da semana com horário de trabalho (vazio se o horário não puder ser lido). */
   weekdays: Weekday[];
+  fields: BookingField[];
 }
 
 export interface Slot {

@@ -1,6 +1,6 @@
 import { getFreeSlots, getSchedule, listEventTypes, type CalEventType, type CalSchedule } from "./calcom";
 import { addDays, lisbonToUtc, minutesToTime, TIMEZONE, timeToMinutes, todayInLisbon, weekdayOf } from "./time";
-import type { AvailableDay, Location, Weekday } from "./types";
+import type { AvailableDay, BookingField, Location, Weekday } from "./types";
 
 // O Cal.com é a agenda: só devolve os horários livres. Para mostrar também os ocupados (riscados),
 // geramos a grelha a partir do horário de trabalho do tipo de evento e marcamos como ocupado
@@ -24,6 +24,29 @@ async function scheduleFor(type: CalEventType): Promise<CalSchedule | null> {
   }
 }
 
+const FIELD_TYPES: Record<string, BookingField["type"]> = {
+  number: "number",
+  textarea: "textarea",
+  radio: "radio",
+  select: "select",
+  checkbox: "checkbox",
+  multiselect: "checkbox",
+  boolean: "boolean",
+};
+
+/** Campos que a Filipa acrescentou ao tipo de evento (os campos por defeito o site já pede). */
+export function customFields(type: CalEventType): BookingField[] {
+  return type.bookingFields
+    .filter((f) => !f.isDefault && !f.hidden && f.slug && f.type !== "unknown")
+    .map((f) => ({
+      slug: f.slug,
+      type: FIELD_TYPES[f.type] ?? "text",
+      label: f.label || f.slug,
+      required: !!f.required,
+      options: f.options ?? [],
+    }));
+}
+
 function toLocation(type: CalEventType, schedule: CalSchedule | null): Location {
   const address = type.locations.find((l) => l.type === "address" && l.public !== false)?.address ?? "";
   const online = type.locations.some((l) => l.type !== "address");
@@ -39,6 +62,7 @@ function toLocation(type: CalEventType, schedule: CalSchedule | null): Location 
     address: online && !address ? "Videochamada" : address,
     online,
     weekdays: [...weekdays].filter((d) => d >= 0).sort(),
+    fields: customFields(type),
   };
 }
 

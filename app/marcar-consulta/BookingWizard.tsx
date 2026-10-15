@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState, useEffect, useMemo, useState } from "react";
-import { describeWeekdays, type AvailableDay, type Location } from "@/lib/booking/types";
+import { describeWeekdays, type AvailableDay, type BookingField, type Location } from "@/lib/booking/types";
 import { formatDateLong } from "@/lib/booking/time";
 import { requestBooking, type BookingFormState } from "./actions";
 
@@ -26,6 +26,55 @@ function monthCells(month: string): (string | null)[] {
   const cells: (string | null)[] = Array(lead).fill(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(`${month}-${String(d).padStart(2, "0")}`);
   return cells;
+}
+
+function CustomField({ field }: { field: BookingField }) {
+  const name = `field:${field.slug}`;
+  const label = (
+    <>
+      {field.label} {!field.required && <small>(opcional)</small>}
+    </>
+  );
+  if (field.type === "radio" || field.type === "checkbox") {
+    return (
+      <fieldset className="full booking-options">
+        <legend>{label}</legend>
+        {field.options.map((option) => (
+          <label key={option}>
+            <input type={field.type} name={name} value={option} required={field.required && field.type === "radio"} />
+            {option}
+          </label>
+        ))}
+      </fieldset>
+    );
+  }
+  if (field.type === "boolean") {
+    return (
+      <label className="full booking-consent">
+        <input type="checkbox" name={name} value="sim" required={field.required} />
+        {field.label}
+      </label>
+    );
+  }
+  return (
+    <label className={field.type === "textarea" ? "full" : undefined}>
+      {label}
+      {field.type === "textarea" ? (
+        <textarea name={name} rows={3} required={field.required} />
+      ) : field.type === "select" ? (
+        <select name={name} required={field.required} defaultValue="">
+          <option value="" disabled>
+            Escolhe…
+          </option>
+          {field.options.map((option) => (
+            <option key={option}>{option}</option>
+          ))}
+        </select>
+      ) : (
+        <input name={name} type={field.type === "number" ? "number" : "text"} required={field.required} />
+      )}
+    </label>
+  );
 }
 
 export default function BookingWizard({ locations }: { locations: Location[] }) {
@@ -246,6 +295,9 @@ export default function BookingWizard({ locations }: { locations: Location[] }) 
               Email
               <input name="email" type="email" required autoComplete="email" />
             </label>
+            {location.fields.map((f) => (
+              <CustomField key={f.slug} field={f} />
+            ))}
             <label className="full">
               Motivo da consulta <small>(opcional)</small>
               <textarea name="notes" rows={3} />

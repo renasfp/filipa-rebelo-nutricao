@@ -19,6 +19,15 @@ export interface CalEventType {
   scheduleId: number | null;
   hidden: boolean;
   locations: { type: string; address?: string; public?: boolean; integration?: string; link?: string }[];
+  bookingFields: {
+    slug: string;
+    type: string;
+    label?: string;
+    required?: boolean;
+    hidden?: boolean;
+    isDefault?: boolean;
+    options?: string[];
+  }[];
 }
 
 export type CalBookingWindow =
@@ -107,6 +116,7 @@ export async function createBooking(input: {
   email: string;
   phoneNumber: string;
   notes: string;
+  responses: Record<string, unknown>;
 }): Promise<CalBooking> {
   return cal<CalBooking>("/bookings", "2024-08-13", {
     method: "POST",
@@ -120,7 +130,7 @@ export async function createBooking(input: {
         timeZone: TIMEZONE,
         language: "pt",
       },
-      bookingFieldsResponses: input.notes ? { notes: input.notes } : undefined,
+      bookingFieldsResponses: { ...input.responses, ...(input.notes && { notes: input.notes }) },
       metadata: { origem: "site", telefone: input.phoneNumber },
     }),
   });

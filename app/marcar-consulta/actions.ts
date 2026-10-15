@@ -1,6 +1,6 @@
 "use server";
 
-import { getAvailability, isSlotFree } from "@/lib/booking/availability";
+import { customFields, getAvailability, isSlotFree } from "@/lib/booking/availability";
 import { CalError, createBooking } from "@/lib/booking/calcom";
 import { lisbonToUtc } from "@/lib/booking/time";
 
@@ -56,6 +56,23 @@ export async function requestBooking(
   try {
     const availability = await getAvailability(locationId);
     if (!availability) return { status: "error", message: "Local inválido." };
+
+    const responses: Record<string, unknown> = {};
+    for (const f of customFields(availability.type)) {
+      const values = formData.getAll(`field:${f.slug}`).map((v) => String(v).trim().slice(0, 500)).filter(Boolean);
+      if (f.options.length && values.some((v) => !f.options.includes(v))) {
+        return { status: "error", message: `Opção inválida em "${f.label}".` };
+      }
+      if (f.required && !values.length) {
+        return { status: "error", message: `Preenche o campo "${f.label}".` };
+      }
+      if (f.type === "boolean") responses[f.slug] = values.length > 0;
+      else if (!values.length) continue;
+      else if (f.type === "checkbox") responses[f.slug] = values;
+      else if (f.type === "number") responses[f.slug] = Number(values[0]);
+      else responses[f.slug] = values[0];
+    }
+
     if (!(await isSlotFree(availability.type, date, time))) return SLOT_TAKEN;
 
     const booking = await createBooking({
@@ -65,6 +82,7 @@ export async function requestBooking(
       email,
       phoneNumber: internationalPhone(phone),
       notes,
+      responses,
     });
     return { status: "success", pending: booking.status !== "accepted" };
   } catch (err) {

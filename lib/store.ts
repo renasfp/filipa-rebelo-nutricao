@@ -1,13 +1,10 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { createClient, type RedisClientType } from "redis";
-import { DEFAULT_CONFIG, type BookingConfig, type BookingRequest } from "./types";
 
+// Contadores com expiração (limite de tentativas de palavra-passe).
 // Em produção usa Redis (REDIS_URL, criado pela integração Redis da Vercel).
 // Sem essa variável, guarda tudo num ficheiro JSON local (.data/db.json) — só para desenvolvimento.
-
-const CONFIG_KEY = "booking:config";
-const REQUESTS_KEY = "booking:requests";
 
 const redisUrl = process.env.REDIS_URL;
 let client: Promise<RedisClientType> | undefined;
@@ -37,56 +34,6 @@ async function readFileDb(): Promise<FileDb> {
 async function writeFileDb(db: FileDb) {
   await fs.mkdir(path.dirname(DB_FILE), { recursive: true });
   await fs.writeFile(DB_FILE, JSON.stringify(db, null, 2));
-}
-
-export async function getConfig(): Promise<BookingConfig> {
-  let stored: Partial<BookingConfig> | undefined;
-  if (redisUrl) {
-    const raw = await redis<string | null>("GET", CONFIG_KEY);
-    stored = raw ? JSON.parse(raw) : undefined;
-  } else {
-    stored = (await readFileDb())[CONFIG_KEY] as Partial<BookingConfig> | undefined;
-  }
-  return { ...DEFAULT_CONFIG, ...stored };
-}
-
-export async function saveConfig(config: BookingConfig) {
-  if (redisUrl) {
-    await redis("SET", CONFIG_KEY, JSON.stringify(config));
-  } else {
-    const db = await readFileDb();
-    db[CONFIG_KEY] = config;
-    await writeFileDb(db);
-  }
-}
-
-export async function listRequests(): Promise<BookingRequest[]> {
-  let requests: BookingRequest[];
-  if (redisUrl) {
-    const flat = await redis<string[]>("HGETALL", REQUESTS_KEY);
-    requests = flat.filter((_, i) => i % 2 === 1).map((v) => JSON.parse(v));
-  } else {
-    requests = Object.values(((await readFileDb())[REQUESTS_KEY] ?? {}) as Record<string, BookingRequest>);
-  }
-  return requests.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-}
-
-export async function saveRequest(request: BookingRequest) {
-  if (redisUrl) {
-    await redis("HSET", REQUESTS_KEY, request.id, JSON.stringify(request));
-  } else {
-    const db = await readFileDb();
-    db[REQUESTS_KEY] = { ...((db[REQUESTS_KEY] ?? {}) as object), [request.id]: request };
-    await writeFileDb(db);
-  }
-}
-
-export async function getRequest(id: string): Promise<BookingRequest | undefined> {
-  if (redisUrl) {
-    const raw = await redis<string | null>("HGET", REQUESTS_KEY, id);
-    return raw ? JSON.parse(raw) : undefined;
-  }
-  return ((await readFileDb())[REQUESTS_KEY] as Record<string, BookingRequest> | undefined)?.[id];
 }
 
 /** Incrementa um contador que expira `ttlSeconds` após o primeiro incremento. Devolve o novo valor. */

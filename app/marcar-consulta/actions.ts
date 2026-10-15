@@ -1,18 +1,32 @@
 "use server";
 
-import { randomUUID } from "crypto";
-import { headers } from "next/headers";
-import { getAvailability } from "@/lib/booking/availability";
-import { sendNewRequestEmail } from "@/lib/booking/email";
-import { saveRequest } from "@/lib/booking/store";
-import type { BookingRequest } from "@/lib/booking/types";
+import { getAvailability, isSlotFree } from "@/lib/booking/availability";
+import { CalError, createBooking } from "@/lib/booking/calcom";
+import { lisbonToUtc } from "@/lib/booking/time";
 
 export interface BookingFormState {
   status: "idle" | "success" | "error" | "slot-taken";
   message?: string;
+  /** Marcação criada mas a aguardar confirmação da nutricionista. */
+  pending?: boolean;
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+const SLOT_TAKEN: BookingFormState = {
+  status: "slot-taken",
+  message: "Esse horário acabou de ficar indisponível. Escolhe outro, por favor.",
+};
+
+/** Formato internacional exigido pelo Cal.com; números sem indicativo são tratados como portugueses. */
+function internationalPhone(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  if (phone.trim().startsWith("+")) return `+${digits}`;
+  if (digits.startsWith("00")) return `+${digits.slice(2)}`;
+  return digits.length === 9 ? `+351${digits}` : `+${digits}`;
+}
 
 export async function requestBooking(
   _prev: BookingFormState,
@@ -37,36 +51,31 @@ export async function requestBooking(
   if (!formData.get("consent")) {
     return { status: "error", message: "É necessário aceitar o tratamento dos dados." };
   }
+  if (!DATE_RE.test(date) || !TIME_RE.test(time)) return SLOT_TAKEN;
 
-  const availability = await getAvailability(locationId);
-  if (!availability) return { status: "error", message: "Local inválido." };
-  const stillFree = availability.days.some((d) => d.date === date && d.slots.some((s) => s.time === time && s.free));
-  if (!stillFree) {
+  try {
+    const availability = await getAvailability(locationId);
+    if (!availability) return { status: "error", message: "Local inválido." };
+    if (!(await isSlotFree(availability.type, date, time))) return SLOT_TAKEN;
+
+    const booking = await createBooking({
+      eventTypeId: availability.type.id,
+      start: lisbonToUtc(date, time),
+      name,
+      email,
+      phoneNumber: internationalPhone(phone),
+      notes,
+    });
+    return { status: "success", pending: booking.status !== "accepted" };
+  } catch (err) {
+    console.error("[marcar-consulta]", err);
+    // O Cal.com recusa com 4xx quando o horário deixou de estar disponível entretanto.
+    if (err instanceof CalError && err.status >= 400 && err.status < 500 && /available|booked|conflict/i.test(err.message)) {
+      return SLOT_TAKEN;
+    }
     return {
-      status: "slot-taken",
-      message: "Esse horário acabou de ficar indisponível. Escolhe outro, por favor.",
+      status: "error",
+      message: "Não foi possível enviar o pedido. Tenta de novo ou contacta-me por WhatsApp.",
     };
   }
-
-  const request: BookingRequest = {
-    id: randomUUID(),
-    createdAt: new Date().toISOString(),
-    status: "pendente",
-    locationId,
-    locationName: availability.location.name,
-    date,
-    time,
-    durationMinutes: availability.config.slotMinutes,
-    name,
-    email,
-    phone,
-    notes,
-  };
-  await saveRequest(request);
-
-  const h = await headers();
-  const origin = `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`;
-  await sendNewRequestEmail(availability.config.notificationEmail, request, `${origin}/admin`);
-
-  return { status: "success" };
 }

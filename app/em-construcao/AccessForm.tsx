@@ -6,7 +6,7 @@ import { enterSite } from "./actions";
 export default function AccessForm({ next }: { next: string }) {
   const [error, formAction, pending] = useActionState(enterSite, null);
   return (
-    <form action={formAction} className="admin-form">
+    <form action={formAction} className="access-form">
       <input type="hidden" name="next" value={next} />
       <label>
         Palavra-passe

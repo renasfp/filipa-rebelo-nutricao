@@ -31,6 +31,7 @@ function monthCells(month: string): (string | null)[] {
 export default function BookingWizard({ locations }: { locations: Location[] }) {
   const [location, setLocation] = useState<Location | null>(null);
   const [days, setDays] = useState<AvailableDay[] | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [month, setMonth] = useState("");
   const [date, setDate] = useState<string | null>(null);
@@ -52,8 +53,10 @@ export default function BookingWizard({ locations }: { locations: Location[] }) 
     let cancelled = false;
     fetch(`/api/disponibilidade?local=${encodeURIComponent(location.id)}`)
       .then((r) => r.json())
+      .catch(() => ({}))
       .then((data: { days?: AvailableDay[] }) => {
         if (cancelled) return;
+        setLoadError(!data.days);
         const list = data.days ?? [];
         setDays(list);
         setMonth((current) => current || (list[0]?.date ?? new Date().toISOString()).slice(0, 7));
@@ -79,11 +82,15 @@ export default function BookingWizard({ locations }: { locations: Location[] }) 
     return (
       <div className="booking-card booking-success">
         <div className="booking-success-icon">✓</div>
-        <h3>Pedido enviado!</h3>
-        <p>
-          Obrigada pelo teu pedido. Vou confirmar a disponibilidade e entro em contacto contigo
-          brevemente por email ou telefone.
-        </p>
+        <h3>{state.pending ? "Pedido enviado!" : "Consulta marcada!"}</h3>
+        {state.pending ? (
+          <p>
+            A tua consulta ficou <strong>pendente</strong> e aguarda confirmação da nutricionista.
+            Vais receber um email assim que for confirmada.
+          </p>
+        ) : (
+          <p>Obrigada! Vais receber a confirmação da consulta por email.</p>
+        )}
         <Link href="/" className="btn-outline">
           Voltar ao início
         </Link>
@@ -95,7 +102,7 @@ export default function BookingWizard({ locations }: { locations: Location[] }) 
     <div className="booking">
       <div className="booking-card">
         <h3 className="booking-step-title">
-          <span>1</span> Onde preferes a consulta?
+          <span>1</span> Que consulta queres marcar?
         </h3>
         <div className="booking-locations">
           {locations.map((l) => (
@@ -106,8 +113,10 @@ export default function BookingWizard({ locations }: { locations: Location[] }) 
               onClick={() => chooseLocation(l)}
             >
               <strong>{l.name}</strong>
-              {l.address && <span>{l.address}</span>}
-              <small>{describeWeekdays(l.weekdays)}</small>
+              <span>
+                {l.lengthInMinutes} min{l.address && ` · ${l.address}`}
+              </span>
+              {l.weekdays.length > 0 && <small>{describeWeekdays(l.weekdays)}</small>}
             </button>
           ))}
         </div>
@@ -121,6 +130,11 @@ export default function BookingWizard({ locations }: { locations: Location[] }) 
           {state.status === "slot-taken" && !time && <p className="booking-error">{state.message}</p>}
           {days === null ? (
             <p className="booking-muted">A carregar horários…</p>
+          ) : loadError ? (
+            <p className="booking-error">
+              Não foi possível carregar a agenda. Tenta de novo daqui a pouco ou contacta-me por
+              WhatsApp.
+            </p>
           ) : days.length === 0 ? (
             <p className="booking-muted">
               De momento não há horários disponíveis para este local. Experimenta outro local ou

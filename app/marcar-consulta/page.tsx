@@ -3,7 +3,8 @@ import { connection } from "next/server";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import WhatsappFloat from "@/components/WhatsappFloat";
-import { getConfig } from "@/lib/booking/store";
+import { getLocations } from "@/lib/booking/availability";
+import type { Location } from "@/lib/booking/types";
 import BookingWizard from "./BookingWizard";
 
 export const metadata: Metadata = {
@@ -13,8 +14,12 @@ export const metadata: Metadata = {
 
 export default async function MarcarConsultaPage() {
   await connection();
-  const config = await getConfig();
-  const locations = config.locations.filter((l) => l.active);
+  let locations: Location[] = [];
+  try {
+    locations = await getLocations();
+  } catch (err) {
+    console.error("[marcar-consulta]", err);
+  }
 
   return (
     <>
@@ -26,10 +31,16 @@ export default async function MarcarConsultaPage() {
             Escolhe o <em>dia e a hora</em>
           </h2>
           <p className="section-sub">
-            Seleciona o local, presencial ou online, e um horário disponível. Recebo o teu pedido e
-            confirmo a marcação contigo.
+            Seleciona o tipo de consulta e um horário disponível. Recebo o teu pedido e confirmo a
+            marcação contigo.
           </p>
-          <BookingWizard locations={locations} />
+          {locations.length ? (
+            <BookingWizard locations={locations} />
+          ) : (
+            <p className="booking-muted">
+              De momento não é possível marcar online. Contacta-me por WhatsApp, por favor.
+            </p>
+          )}
         </div>
       </section>
       <Footer />

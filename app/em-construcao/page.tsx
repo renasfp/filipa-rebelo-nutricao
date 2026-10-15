@@ -14,13 +14,13 @@ export default async function UnderConstructionPage({ searchParams }: PageProps<
   if (hasSiteAccess((await cookies()).get(SITE_ACCESS_COOKIE)?.value)) redirect(next);
 
   return (
-    <main className="admin-login">
-      <div className="admin-card">
+    <main className="access-page">
+      <div className="access-card">
         <span className="nav-logo">
           Filipa Rebelo <span>Nutricionista</span>
         </span>
         <h1>Site em construção</h1>
-        <p className="construction-text">Estamos a preparar o novo site. Volte em breve!</p>
+        <p className="access-text">Estamos a preparar o novo site. Volte em breve!</p>
         <AccessForm next={next} />
       </div>
     </main>

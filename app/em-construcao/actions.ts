@@ -2,7 +2,7 @@
 
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { deleteKey, getCounter, incrementCounter } from "@/lib/booking/store";
+import { deleteKey, getCounter, incrementCounter } from "@/lib/store";
 import {
   checkSitePassword,
   safeNextPath,

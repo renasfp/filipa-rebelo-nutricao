@@ -136,6 +136,28 @@ export async function listBookings(afterStart: Date): Promise<CalBookingDetails[
   }
 }
 
+/** Ações da profissional sobre uma marcação existente (exigem API key). */
+export async function confirmBooking(uid: string) {
+  return cal<CalBooking>(`/bookings/${uid}/confirm`, "2024-08-13", { method: "POST", auth: true });
+}
+
+export async function cancelBooking(uid: string, reason: string) {
+  return cal<CalBooking>(`/bookings/${uid}/cancel`, "2024-08-13", {
+    method: "POST",
+    auth: true,
+    body: JSON.stringify({ cancellationReason: reason }),
+  });
+}
+
+/** Remarca; o Cal.com cria uma marcação nova (novo uid) e cancela a antiga. */
+export async function rescheduleBooking(uid: string, start: Date, reason: string) {
+  return cal<CalBooking>(`/bookings/${uid}/reschedule`, "2024-08-13", {
+    method: "POST",
+    auth: true,
+    body: JSON.stringify({ start: start.toISOString(), reschedulingReason: reason }),
+  });
+}
+
 export async function createBooking(input: {
   eventTypeId: number;
   start: Date;

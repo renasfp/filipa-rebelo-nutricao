@@ -1,5 +1,12 @@
 import { createHash, timingSafeEqual } from "crypto";
-import { listBookings, listEventTypes, type CalBookingDetails } from "./booking/calcom";
+import {
+  cancelBooking,
+  confirmBooking,
+  listBookings,
+  listEventTypes,
+  rescheduleBooking,
+  type CalBookingDetails,
+} from "./booking/calcom";
 import { getMap, setMapEntry } from "./store";
 
 // Ponte entre o Cal.com e a extensão do Chrome que cria as consultas no Nutrium.
@@ -94,4 +101,28 @@ export async function listSyncBookings(): Promise<SyncBooking[]> {
 
 export async function markSynced(uid: string, state: Omit<SyncState, "syncedAt">) {
   await setMapEntry(SYNC_KEY, uid, { ...state, syncedAt: new Date().toISOString() } satisfies SyncState);
+}
+
+export type CalAction = "confirm" | "cancel" | "reschedule";
+
+/**
+ * Aplica no Cal.com uma alteração feita no Nutrium (confirmar, cancelar ou mudar a hora) e regista
+ * as marcações afetadas como já sincronizadas, para a extensão não a repetir no Nutrium.
+ */
+export async function applyFromNutrium(uid: string, action: CalAction, start?: Date) {
+  const before = (await listSyncBookings()).find((b) => b.uid === uid);
+  if (!before?.synced) throw new Error("Marcação desconhecida ou ainda não sincronizada com o Nutrium.");
+  const { nutriumId, patientId } = before.synced;
+  const reason = "Alterado no Nutrium pela nutricionista";
+
+  let newUid = uid;
+  if (action === "confirm") await confirmBooking(uid);
+  else if (action === "cancel") await cancelBooking(uid, reason);
+  else newUid = (await rescheduleBooking(uid, start!, reason)).uid;
+
+  const after = await listSyncBookings();
+  for (const b of after.filter((b) => b.uid === uid || b.uid === newUid)) {
+    await markSynced(b.uid, { nutriumId, patientId, version: b.version });
+  }
+  return after.find((b) => b.uid === newUid) ?? null;
 }

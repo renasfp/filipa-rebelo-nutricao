@@ -6,14 +6,16 @@
   </head>
   <body class="popup">
     <header>
-      <strong>Cal.com → Nutrium</strong>
+      <strong>Cal.com ↔ Nutrium</strong>
       <a href="options.html" target="_blank">Opções</a>
     </header>
-    <button id="sync" class="primary">Sincronizar agora</button>
     <p id="status" class="muted"></p>
-    <ul id="list"></ul>
-    <h2 id="only-title" hidden>Só no Nutrium</h2>
-    <ul id="only"></ul>
+    <div id="counts" class="counts"></div>
+    <ul id="attention"></ul>
+    <div class="popup-actions">
+      <button id="sync" class="primary">Sincronizar agora</button>
+      <button id="agenda" class="btn-ghost">Abrir agenda</button>
+    </div>
     <script src="popup.js" type="module"></script>
   </body>
 </html>

@@ -1,9 +1,9 @@
+import { STATES } from "./common.js";
+
 const button = document.getElementById("sync");
 const status = document.getElementById("status");
-const list = document.getElementById("list");
-const only = document.getElementById("only");
-const onlyTitle = document.getElementById("only-title");
-const NUTRIUM_STATUS = ["confirmada", "não confirmada", "cancelada"];
+const counts = document.getElementById("counts");
+const attention = document.getElementById("attention");
 
 const dateFormat = new Intl.DateTimeFormat("pt-PT", {
   timeZone: "Europe/Lisbon",
@@ -14,53 +14,38 @@ const dateFormat = new Intl.DateTimeFormat("pt-PT", {
   minute: "2-digit",
 });
 
-function item(b, result, diff) {
-  const li = document.createElement("li");
-  const synced = b.synced && b.synced.version === b.version;
-  const skipped = !b.synced && (b.status === "cancelada" || b.status === "recusada");
-  const state =
-    result && !result.ok ? "erro" : diff ? "diferente" : synced ? "ok" : skipped ? "ignorada" : "por sincronizar";
-  li.className = `state-${state.replace(" ", "-")}`;
-  li.innerHTML = `
-    <div><strong></strong> <span class="chip"></span></div>
-    <div class="muted"></div>
-    <div class="state"></div>`;
-  li.querySelector("strong").textContent = b.nome;
-  li.querySelector(".chip").textContent = b.status;
-  li.querySelector(".muted").textContent =
-    `${dateFormat.format(new Date(b.start))} · ${b.consulta}${b.local ? ` · ${b.local}` : ""}`;
-  li.querySelector(".state").textContent =
-    state === "erro" ? `Erro: ${result.error}` : state === "diferente" ? `⚠ ${diff}` : state === "ok" ? "✓ No Nutrium" : state;
-  return li;
-}
-
-function nutriumItem(a) {
-  const li = document.createElement("li");
-  li.innerHTML = `<div><strong></strong> <span class="chip"></span></div><div class="muted"></div>`;
-  li.querySelector("strong").textContent = a.nome;
-  li.querySelector(".chip").textContent = NUTRIUM_STATUS[a.status] ?? "";
-  li.querySelector(".muted").textContent = dateFormat.format(new Date(a.start));
-  return li;
-}
-
 async function render() {
   const { lastSync } = await chrome.storage.local.get("lastSync");
-  list.replaceChildren();
-  only.replaceChildren();
-  if (!lastSync) {
-    status.textContent = "Ainda não sincronizou.";
-    return;
-  }
-  const when = new Date(lastSync.startedAt).toLocaleString("pt-PT");
-  status.textContent = lastSync.error ? `Erro: ${lastSync.error}` : `Última sincronização: ${when}`;
-  status.classList.toggle("error", !!lastSync.error);
-  const upcoming = lastSync.bookings.filter((b) => new Date(b.end) > new Date());
-  const diffs = lastSync.comparison?.diffs ?? {};
-  for (const b of upcoming) list.append(item(b, lastSync.results[b.uid], diffs[b.uid]));
-  if (!upcoming.length && !lastSync.error) list.innerHTML = `<li class="muted">Sem marcações futuras do site.</li>`;
-  const nutriumOnly = (lastSync.comparison?.nutriumOnly ?? []).filter((a) => new Date(a.end) > new Date());
-  onlyTitle.hidden = !nutriumOnly.length;
-  for (const a of nutriumOnly) only.append(nutriumItem(a));
+  const agenda = lastSync?.agenda ?? [];
+  status.textContent = lastSync?.error
+    ? `Erro: ${lastSync.error}`
+    : lastSync
+      ? `Última sincronização: ${new Date(lastSync.startedAt).toLocaleString("pt-PT")}`
+      : "Ainda não sincronizou.";
+  status.classList.toggle("error", !!lastSync?.error);
+
+  counts.replaceChildren(
+    ...["diferente", "so-cal", "so-nutrium", "ambos"].map((state) => {
+      const n = agenda.filter((e) => e.state === state || (state === "diferente" && e.state === "erro")).length;
+      const div = document.createElement("div");
+      div.className = `count count-${state}`;
+      div.innerHTML = `<b>${n}</b><span></span>`;
+      div.lastElementChild.textContent = state === "diferente" ? "Com diferenças" : STATES[state].label;
+      return div;
+    }),
+  );
+
+  const urgent = agenda.filter((e) => e.state === "diferente" || e.state === "erro").slice(0, 4);
+  attention.replaceChildren(
+    ...urgent.map((e) => {
+      const li = document.createElement("li");
+      li.innerHTML = "<strong></strong><div class='muted'></div><div class='state'></div>";
+      li.querySelector("strong").textContent = e.nome;
+      li.querySelector(".muted").textContent = dateFormat.format(new Date(e.start));
+      li.querySelector(".state").textContent = e.error ?? e.issues[0]?.text ?? "";
+      return li;
+    }),
+  );
 }
 
 button.addEventListener("click", async () => {
@@ -69,7 +54,11 @@ button.addEventListener("click", async () => {
   await chrome.runtime.sendMessage({ type: "sync" });
   button.disabled = false;
   button.textContent = "Sincronizar agora";
-  render();
+});
+
+document.getElementById("agenda").addEventListener("click", () => {
+  chrome.runtime.sendMessage({ type: "open-agenda" });
+  window.close();
 });
 
 chrome.storage.onChanged.addListener(render);

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <title>Agenda · Cal.com ↔ Nutrium</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="agenda-page">
+    <header class="agenda-header">
+      <div>
+        <h1>Agenda</h1>
+        <p id="status" class="muted"></p>
+      </div>
+      <div class="header-actions">
+        <a href="options.html" class="btn-ghost">Opções</a>
+        <button id="sync" class="primary">Sincronizar</button>
+      </div>
+    </header>
+
+    <nav id="filters" class="filters" aria-label="Filtrar consultas"></nav>
+    <div id="banner" class="banner" hidden></div>
+    <main id="days"></main>
+
+    <template id="row">
+      <article class="entry">
+        <div class="entry-time"><strong class="start"></strong><span class="end muted"></span></div>
+        <div class="entry-main">
+          <div class="entry-title"><strong class="name"></strong> <span class="state-label"></span></div>
+          <div class="details muted"></div>
+          <div class="issues"></div>
+        </div>
+        <div class="sources">
+          <span class="source cal"></span>
+          <span class="source nutrium"></span>
+        </div>
+      </article>
+    </template>
+
+    <script src="agenda.js" type="module"></script>
+  </body>
+</html>

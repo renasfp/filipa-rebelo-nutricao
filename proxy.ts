@@ -11,5 +11,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!em-construcao|_next/static|_next/image|images/|favicon.ico).*)"],
+  // /api/nutrium tem autenticação própria (token da extensão do Chrome).
+  matcher: ["/((?!em-construcao|api/nutrium|_next/static|_next/image|images/|favicon.ico).*)"],
 };

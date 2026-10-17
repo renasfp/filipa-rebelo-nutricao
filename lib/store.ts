@@ -2,7 +2,8 @@ import { promises as fs } from "fs";
 import path from "path";
 import { createClient, type RedisClientType } from "redis";
 
-// Contadores com expiração (limite de tentativas de palavra-passe).
+// Contadores com expiração (limite de tentativas de palavra-passe) e mapas JSON simples
+// (estado da sincronização com o Nutrium).
 // Em produção usa Redis (REDIS_URL, criado pela integração Redis da Vercel).
 // Sem essa variável, guarda tudo num ficheiro JSON local (.data/db.json) — só para desenvolvimento.
 
@@ -66,6 +67,27 @@ export async function deleteKey(key: string) {
   } else {
     const db = await readFileDb();
     delete db[key];
+    await writeFileDb(db);
+  }
+}
+
+/** Todos os valores JSON guardados no mapa `key`, indexados pelo campo. */
+export async function getMap<T>(key: string): Promise<Record<string, T>> {
+  if (redisUrl) {
+    const flat = await redis<string[]>("HGETALL", key);
+    const map: Record<string, T> = {};
+    for (let i = 0; i < flat.length; i += 2) map[flat[i]] = JSON.parse(flat[i + 1]);
+    return map;
+  }
+  return ((await readFileDb())[key] ?? {}) as Record<string, T>;
+}
+
+export async function setMapEntry(key: string, field: string, value: unknown) {
+  if (redisUrl) {
+    await redis("HSET", key, field, JSON.stringify(value));
+  } else {
+    const db = await readFileDb();
+    db[key] = { ...((db[key] ?? {}) as object), [field]: value };
     await writeFileDb(db);
   }
 }

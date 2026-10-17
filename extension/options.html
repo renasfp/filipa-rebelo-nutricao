@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <title>Opções · Cal.com → Nutrium</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="options">
+    <h1>Cal.com → Nutrium</h1>
+    <form id="form">
+      <label>
+        Endereço do site
+        <input name="siteUrl" type="url" required />
+      </label>
+      <label>
+        Token de sincronização
+        <input name="token" type="password" required autocomplete="off" />
+        <small class="muted">O mesmo valor de NUTRIUM_SYNC_TOKEN na Vercel.</small>
+      </label>
+      <label>
+        Quando uma marcação é cancelada no site
+        <select name="onCancel">
+          <option value="cancel">Marcar como cancelada no Nutrium</option>
+          <option value="delete">Eliminar a consulta do Nutrium</option>
+        </select>
+      </label>
+      <details>
+        <summary class="muted">Avançado (Nutrium)</summary>
+        <label>ID do local de trabalho <input name="workplaceId" required /></label>
+        <label>ID da profissional <input name="professionalId" required /></label>
+        <label>ID do país (Portugal) <input name="countryId" required /></label>
+      </details>
+      <button class="primary">Guardar</button>
+      <span id="saved" class="muted"></span>
+    </form>
+    <script src="options.js" type="module"></script>
+  </body>
+</html>

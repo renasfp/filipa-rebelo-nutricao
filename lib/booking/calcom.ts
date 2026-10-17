@@ -45,6 +45,15 @@ export interface CalBooking {
   status: string;
 }
 
+export interface CalBookingDetails extends CalBooking {
+  start: string;
+  end: string;
+  eventType: { id: number; slug: string };
+  attendees: { name: string; email: string; phoneNumber?: string }[];
+  bookingFieldsResponses: Record<string, unknown>;
+  rescheduledToUid?: string | null;
+}
+
 export class CalError extends Error {
   status: number;
 
@@ -107,6 +116,23 @@ export async function getFreeSlots(eventTypeId: number, from: string, to: string
   const data = await cal<Record<string, { start: string }[]>>(`/slots?${params}`, "2024-09-04");
   // Com timeZone, cada início vem como "2026-10-20T13:00:00.000+01:00".
   return new Map(Object.entries(data ?? {}).map(([date, slots]) => [date, slots.map((s) => s.start.slice(11, 16))]));
+}
+
+/** Todas as marcações (qualquer estado) que começam depois de `afterStart`. Exige API key. */
+export async function listBookings(afterStart: Date): Promise<CalBookingDetails[]> {
+  const bookings: CalBookingDetails[] = [];
+  for (let skip = 0; ; skip += 100) {
+    const params = new URLSearchParams({
+      status: "upcoming,unconfirmed,past,cancelled",
+      afterStart: afterStart.toISOString(),
+      sortStart: "asc",
+      take: "100",
+      skip: String(skip),
+    });
+    const page = await cal<CalBookingDetails[]>(`/bookings?${params}`, "2024-08-13", { auth: true });
+    bookings.push(...page);
+    if (page.length < 100) return bookings;
+  }
 }
 
 export async function createBooking(input: {

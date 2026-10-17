@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Filipa Rebelo · Cal.com → Nutrium",
+  "version": "0.1.0",
+  "description": "Copia as marcações do Cal.com (feitas no site) para a agenda do Nutrium.",
+  "permissions": ["storage", "scripting", "tabs"],
+  "host_permissions": [
+    "https://filipa-rebelo-nutricao.vercel.app/*",
+    "http://localhost:3000/*",
+    "https://*.nutrium.com/*"
+  ],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "content_scripts": [
+    {
+      "matches": ["https://*.nutrium.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": { "default_popup": "popup.html", "default_title": "Sincronizar com o Nutrium" },
+  "options_page": "options.html"
+}

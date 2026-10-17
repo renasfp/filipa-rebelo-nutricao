@@ -1,0 +1,118 @@
+:root {
+  --ink: #2b2a28;
+  --stone: #6b6560;
+  --linen: #ede9e2;
+  --sage: #5e7a5b;
+  --error: #a4473b;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+body {
+  margin: 0;
+  background: #fff;
+}
+
+.popup {
+  width: 340px;
+  padding: 12px;
+}
+
+.options {
+  max-width: 420px;
+  padding: 24px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+a {
+  color: var(--sage);
+}
+
+.primary {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  background: var(--sage);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.primary:disabled {
+  opacity: 0.6;
+}
+
+.muted {
+  color: var(--stone);
+}
+
+.error {
+  color: var(--error);
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  border-top: 1px solid var(--linen);
+  padding: 8px 0;
+}
+
+.chip {
+  font-size: 11px;
+  border-radius: 99px;
+  padding: 1px 6px;
+  background: var(--linen);
+}
+
+.state {
+  font-size: 12px;
+}
+
+.state-ok .state {
+  color: var(--sage);
+}
+
+h2 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--stone);
+  margin: 14px 0 4px;
+}
+
+.state-erro .state,
+.state-diferente .state {
+  color: var(--error);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+input,
+select {
+  font: inherit;
+  padding: 6px 8px;
+  border: 1px solid var(--linen);
+  border-radius: 6px;
+}

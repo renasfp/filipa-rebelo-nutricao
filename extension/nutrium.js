@@ -59,6 +59,25 @@
     return ids[0] ?? null;
   }
 
+  /** Mensagens de erro de um formulário devolvido pelo Nutrium (com o nome do campo, se houver). */
+  function formErrors(html) {
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const selector =
+      ".help-block, .invalid-feedback, .error-message, .field_with_errors + .error, #error_explanation li, .alert-danger, .alert-error, .flash-error, [class*='error'] .help-inline";
+    const messages = [...doc.querySelectorAll(selector)].map((el) => {
+      const group = el.closest(".form-group, .field, .input");
+      const label = group?.querySelector("label")?.textContent.trim();
+      const text = el.textContent.replace(/\s+/g, " ").trim();
+      return label && !text.startsWith(label) ? `${label}: ${text}` : text;
+    });
+    // Campos marcados com erro mas sem mensagem própria.
+    for (const el of doc.querySelectorAll(".field_with_errors input, .has-error input, .is-invalid")) {
+      const name = el.getAttribute("name");
+      if (name) messages.push(`campo ${name}`);
+    }
+    return [...new Set(messages.filter(Boolean))].slice(0, 5);
+  }
+
   async function createPatient(b, config) {
     // Formulário normal (não XHR): em caso de sucesso o Nutrium redireciona para a lista de clientes.
     const res = await fetch("/patients", {
@@ -75,9 +94,15 @@
       }),
     });
     if (/sign_in|login/.test(res.url)) throw new Error("Sessão do Nutrium expirada. Faz login e tenta de novo.");
-    // Se a validação falhar, o Nutrium volta a mostrar o formulário (sem criar o cliente).
+    // Se a validação falhar, o Nutrium volta a mostrar o formulário (sem criar o cliente) com os erros.
     const id = res.ok ? await findPatient(b.email) : null;
-    if (!id) throw new Error(`Não foi possível criar o cliente ${b.nome} no Nutrium (faltam dados obrigatórios?).`);
+    if (!id) {
+      const reasons = formErrors(await res.text());
+      throw new Error(
+        `Não foi possível criar o cliente ${b.nome} no Nutrium` +
+          (reasons.length ? `: ${reasons.join("; ")}` : ` (resposta ${res.status}, sem mensagem de erro).`),
+      );
+    }
     if (b.nif) {
       await request("PATCH", `/remote/editables/professionals/patients/${id}`, {
         name: "vat_identifier",

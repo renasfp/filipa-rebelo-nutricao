@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState, useEffect, useMemo, useState } from "react";
-import { describeWeekdays, type AvailableDay, type BookingField, type Location } from "@/lib/booking/types";
+import { describeWeekdays, GENDERS, type AvailableDay, type BookingField, type Location } from "@/lib/booking/types";
 import { formatDateLong } from "@/lib/booking/time";
 import { requestBooking, type BookingFormState } from "./actions";
 
@@ -294,6 +294,21 @@ export default function BookingWizard({ locations }: { locations: Location[] }) 
             <label className="full">
               Email
               <input name="email" type="email" required autoComplete="email" />
+            </label>
+            <label>
+              Data de nascimento
+              <input name="birthdate" type="date" required min="1900-01-01" autoComplete="bday" />
+            </label>
+            <label>
+              Género
+              <select name="gender" required defaultValue="">
+                <option value="" disabled>
+                  Escolhe…
+                </option>
+                {GENDERS.map((g) => (
+                  <option key={g}>{g}</option>
+                ))}
+              </select>
             </label>
             {location.fields.map((f) => (
               <CustomField key={f.slug} field={f} />

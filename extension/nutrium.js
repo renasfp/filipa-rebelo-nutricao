@@ -12,6 +12,8 @@
 (() => {
   // scheduling_status_id no Nutrium.
   const STATUS = { confirmada: 0, pendente: 1, cancelada: 2, recusada: 2 };
+  // patient[gender] no Nutrium.
+  const GENDER = { Masculino: "0", Feminino: "1", Outro: "2" };
 
   function csrfToken() {
     const token = document.querySelector('meta[name="csrf-token"]')?.content;
@@ -79,6 +81,13 @@
   }
 
   async function createPatient(b, config) {
+    // Nome, género, data de nascimento e país são obrigatórios no Nutrium.
+    if (!b.nascimento || !GENDER[b.genero]) {
+      throw new Error(
+        `Falta a data de nascimento ou o género de ${b.nome} (marcação anterior a o site os pedir). ` +
+          "Cria o cliente à mão no Nutrium com este email e sincroniza de novo.",
+      );
+    }
     // Formulário normal (não XHR): em caso de sucesso o Nutrium redireciona para a lista de clientes.
     const res = await fetch("/patients", {
       method: "POST",
@@ -87,6 +96,8 @@
       body: new URLSearchParams({
         authenticity_token: csrfToken(),
         "patient[name]": b.nome,
+        "patient[gender]": GENDER[b.genero],
+        "patient[birthdate]": b.nascimento,
         "patient[workplace_id]": config.workplaceId,
         "patient[phone_number]": b.telefone,
         "patient[account][email]": b.email,

@@ -37,6 +37,9 @@ export interface SyncBooking {
   nif: string;
   local: string;
   motivo: string;
+  /** YYYY-MM-DD; vazio em marcações feitas antes de o site o pedir. */
+  nascimento: string;
+  genero: string;
   /** Muda sempre que algum dos dados acima muda; serve para detetar o que falta sincronizar. */
   version: string;
   synced: SyncState | null;
@@ -70,6 +73,8 @@ function normalize(b: CalBookingDetails, titles: Map<string, string>, synced: Sy
     nif: text(r.NIF),
     local: text(r.Local),
     motivo: text(r.notes),
+    nascimento: text(b.metadata?.nascimento),
+    genero: text(b.metadata?.genero),
   };
   const version = createHash("sha1").update(JSON.stringify(data)).digest("hex").slice(0, 12);
   return { ...data, version, synced: synced ?? null };

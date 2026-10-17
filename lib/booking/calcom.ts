@@ -51,6 +51,7 @@ export interface CalBookingDetails extends CalBooking {
   eventType: { id: number; slug: string };
   attendees: { name: string; email: string; phoneNumber?: string }[];
   bookingFieldsResponses: Record<string, unknown>;
+  metadata?: Record<string, string>;
   rescheduledToUid?: string | null;
 }
 
@@ -143,6 +144,9 @@ export async function createBooking(input: {
   phoneNumber: string;
   notes: string;
   responses: Record<string, unknown>;
+  /** Data de nascimento (YYYY-MM-DD) e género, para criar o cliente no Nutrium. */
+  birthdate: string;
+  gender: string;
 }): Promise<CalBooking> {
   return cal<CalBooking>("/bookings", "2024-08-13", {
     method: "POST",
@@ -157,7 +161,7 @@ export async function createBooking(input: {
         language: "pt",
       },
       bookingFieldsResponses: { ...input.responses, ...(input.notes && { notes: input.notes }) },
-      metadata: { origem: "site", telefone: input.phoneNumber },
+      metadata: { origem: "site", telefone: input.phoneNumber, nascimento: input.birthdate, genero: input.gender },
     }),
   });
 }

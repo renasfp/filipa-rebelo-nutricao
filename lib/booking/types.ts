@@ -1,6 +1,9 @@
 /** 0 = domingo … 6 = sábado (como Date.getDay). */
 export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
+/** Pedidos pelo Nutrium para criar o cliente (guardados nos metadados da marcação no Cal.com). */
+export const GENDERS = ["Feminino", "Masculino", "Outro"] as const;
+
 /** Campo personalizado do formulário de marcação, definido no tipo de evento do Cal.com. */
 export interface BookingField {
   slug: string;

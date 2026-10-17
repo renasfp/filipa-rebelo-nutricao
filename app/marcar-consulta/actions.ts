@@ -2,7 +2,8 @@
 
 import { customFields, getAvailability, isSlotFree } from "@/lib/booking/availability";
 import { CalError, createBooking } from "@/lib/booking/calcom";
-import { lisbonToUtc } from "@/lib/booking/time";
+import { lisbonToUtc, todayInLisbon } from "@/lib/booking/time";
+import { GENDERS } from "@/lib/booking/types";
 
 export interface BookingFormState {
   status: "idle" | "success" | "error" | "slot-taken";
@@ -44,9 +45,17 @@ export async function requestBooking(
   const email = field("email").slice(0, 200);
   const phone = field("phone").slice(0, 40);
   const notes = field("notes").slice(0, 2000);
+  const birthdate = field("birthdate");
+  const gender = field("gender");
 
   if (!name || !EMAIL_RE.test(email) || phone.replace(/\D/g, "").length < 9) {
     return { status: "error", message: "Preenche o nome, um email válido e o telefone." };
+  }
+  if (!DATE_RE.test(birthdate) || birthdate < "1900-01-01" || birthdate > todayInLisbon()) {
+    return { status: "error", message: "Indica uma data de nascimento válida." };
+  }
+  if (!(GENDERS as readonly string[]).includes(gender)) {
+    return { status: "error", message: "Indica o género." };
   }
   if (!formData.get("consent")) {
     return { status: "error", message: "É necessário aceitar o tratamento dos dados." };
@@ -83,6 +92,8 @@ export async function requestBooking(
       phoneNumber: internationalPhone(phone),
       notes,
       responses,
+      birthdate,
+      gender,
     });
     return { status: "success", pending: booking.status !== "accepted" };
   } catch (err) {

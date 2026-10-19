@@ -318,6 +318,10 @@ export default function BookingWizard({ locations }: { locations: Location[] }) 
               <textarea name="notes" rows={3} />
             </label>
             <label className="full booking-consent">
+              <input type="checkbox" name="reminders" value="sim" />
+              Quero receber um lembrete da consulta por WhatsApp 48 horas antes.
+            </label>
+            <label className="full booking-consent">
               <input type="checkbox" name="consent" required />
               Aceito que os meus dados sejam usados apenas para gerir este pedido de consulta.
             </label>

@@ -99,6 +99,7 @@ export async function requestBooking(
       responses,
       birthdate,
       gender,
+      reminders: formData.get("reminders") === "sim",
     });
     return { status: "success", pending: booking.status !== "accepted" };
   } catch (err) {

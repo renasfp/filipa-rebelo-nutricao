@@ -169,6 +169,8 @@ export async function createBooking(input: {
   /** Data de nascimento (YYYY-MM-DD) e género, para criar o cliente no Nutrium. */
   birthdate: string;
   gender: string;
+  /** A cliente aceitou receber o lembrete 48h antes (WhatsApp/SMS). */
+  reminders: boolean;
 }): Promise<CalBooking> {
   return cal<CalBooking>("/bookings", "2024-08-13", {
     method: "POST",
@@ -183,7 +185,13 @@ export async function createBooking(input: {
         language: "pt",
       },
       bookingFieldsResponses: { ...input.responses, ...(input.notes && { notes: input.notes }) },
-      metadata: { origem: "site", telefone: input.phoneNumber, nascimento: input.birthdate, genero: input.gender },
+      metadata: {
+        origem: "site",
+        telefone: input.phoneNumber,
+        nascimento: input.birthdate,
+        genero: input.gender,
+        lembretes: input.reminders ? "sim" : "nao",
+      },
     }),
   });
 }

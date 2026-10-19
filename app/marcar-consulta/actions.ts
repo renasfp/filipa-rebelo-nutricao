@@ -1,9 +1,11 @@
 "use server";
 
+import { headers } from "next/headers";
 import { customFields, getAvailability, isSlotFree } from "@/lib/booking/availability";
 import { CalError, createBooking } from "@/lib/booking/calcom";
 import { lisbonToUtc, todayInLisbon } from "@/lib/booking/time";
 import { GENDERS } from "@/lib/booking/types";
+import { clientIp, hitLimit } from "@/lib/rate-limit";
 
 export interface BookingFormState {
   status: "idle" | "success" | "error" | "slot-taken";
@@ -61,6 +63,9 @@ export async function requestBooking(
     return { status: "error", message: "É necessário aceitar o tratamento dos dados." };
   }
   if (!DATE_RE.test(date) || !TIME_RE.test(time)) return SLOT_TAKEN;
+  if (await hitLimit("marcacao", clientIp(await headers()), 5, 15 * 60)) {
+    return { status: "error", message: "Recebemos demasiados pedidos deste dispositivo. Tenta de novo mais tarde." };
+  }
 
   try {
     const availability = await getAvailability(locationId);

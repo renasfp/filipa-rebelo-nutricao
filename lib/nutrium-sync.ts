@@ -7,6 +7,7 @@ import {
   rescheduleBooking,
   type CalBookingDetails,
 } from "./booking/calcom";
+import { clientIp, countFailure, overLimit, tooManyRequests } from "./rate-limit";
 import { getMap, setMapEntry } from "./store";
 
 // Ponte entre o Cal.com e a extensão do Chrome que cria as consultas no Nutrium.
@@ -59,6 +60,18 @@ export function checkSyncToken(header: string | null) {
   const a = createHash("sha256").update(given).digest();
   const b = createHash("sha256").update(expected).digest();
   return timingSafeEqual(a, b);
+}
+
+const MAX_TOKEN_FAILURES = 10;
+const TOKEN_FAILURE_WINDOW = 15 * 60;
+
+/** Autoriza um pedido da extensão (token), bloqueando o IP após várias tentativas falhadas. */
+export async function authorizeSync(request: Request): Promise<Response | null> {
+  const ip = clientIp(request.headers);
+  if (await overLimit("token", ip, MAX_TOKEN_FAILURES)) return tooManyRequests();
+  if (checkSyncToken(request.headers.get("authorization"))) return null;
+  await countFailure("token", ip, TOKEN_FAILURE_WINDOW);
+  return Response.json({ error: "Token inválido" }, { status: 401 });
 }
 
 function text(value: unknown) {

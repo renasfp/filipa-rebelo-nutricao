@@ -1,13 +1,12 @@
 import type { NextRequest } from "next/server";
-import { checkSyncToken, listSyncBookings, markSynced } from "@/lib/nutrium-sync";
+import { authorizeSync, listSyncBookings, markSynced } from "@/lib/nutrium-sync";
 
 // Usado pela extensão do Chrome (pasta extension/). Fora da proteção "em construção" (ver proxy.ts),
 // por isso exige sempre o token.
 
-const unauthorized = () => Response.json({ error: "Token inválido" }, { status: 401 });
-
 export async function GET(request: NextRequest) {
-  if (!checkSyncToken(request.headers.get("authorization"))) return unauthorized();
+  const denied = await authorizeSync(request);
+  if (denied) return denied;
   try {
     return Response.json({ bookings: await listSyncBookings() });
   } catch (err) {
@@ -18,7 +17,8 @@ export async function GET(request: NextRequest) {
 
 /** Regista que a marcação `uid` (na versão `version`) já está no Nutrium (consulta `nutriumId`, cliente `patientId`). */
 export async function POST(request: NextRequest) {
-  if (!checkSyncToken(request.headers.get("authorization"))) return unauthorized();
+  const denied = await authorizeSync(request);
+  if (denied) return denied;
   const body = await request.json().catch(() => null);
   const { uid, nutriumId, patientId, version } = body ?? {};
   if (![uid, nutriumId, patientId, version].every((v) => typeof v === "string" && v && v.length <= 200)) {

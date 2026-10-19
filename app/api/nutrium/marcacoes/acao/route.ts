@@ -1,14 +1,13 @@
 import type { NextRequest } from "next/server";
 import { CalError } from "@/lib/booking/calcom";
-import { applyFromNutrium, checkSyncToken, type CalAction } from "@/lib/nutrium-sync";
+import { applyFromNutrium, authorizeSync, type CalAction } from "@/lib/nutrium-sync";
 
 const ACTIONS: CalAction[] = ["confirm", "cancel", "reschedule"];
 
 /** A extensão pede para aplicar no Cal.com uma alteração feita no Nutrium. */
 export async function POST(request: NextRequest) {
-  if (!checkSyncToken(request.headers.get("authorization"))) {
-    return Response.json({ error: "Token inválido" }, { status: 401 });
-  }
+  const denied = await authorizeSync(request);
+  if (denied) return denied;
   const { uid, action, start } = (await request.json().catch(() => null)) ?? {};
   const startDate = start ? new Date(start) : undefined;
   if (typeof uid !== "string" || !ACTIONS.includes(action) || (action === "reschedule" && !startDate?.getTime())) {

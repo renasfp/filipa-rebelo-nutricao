@@ -2,8 +2,8 @@ import { promises as fs } from "fs";
 import path from "path";
 import { createClient, type RedisClientType } from "redis";
 
-// Contadores com expiração (limite de tentativas de palavra-passe) e mapas JSON simples
-// (estado da sincronização com o Nutrium).
+// Estado pequeno do site: contadores com expiração (limites de tentativas e de pedidos),
+// mapas JSON (sincronização com o Nutrium), chaves de idempotência e registos curtos (webhooks).
 // Em produção usa Redis (REDIS_URL, criado pela integração Redis da Vercel).
 // Sem essa variável, guarda tudo num ficheiro JSON local (.data/db.json) — só para desenvolvimento.
 
@@ -90,4 +90,32 @@ export async function setMapEntry(key: string, field: string, value: unknown) {
     db[key] = { ...((db[key] ?? {}) as object), [field]: value };
     await writeFileDb(db);
   }
+}
+
+/** Reserva `key` durante `ttlSeconds`. Devolve false se já estava reservada (evento repetido). */
+export async function claimOnce(key: string, ttlSeconds: number): Promise<boolean> {
+  if (redisUrl) return (await redis<string | null>("SET", key, "1", "NX", "EX", String(ttlSeconds))) === "OK";
+  const db = await readFileDb();
+  const entry = db[key] as { expiresAt: number } | undefined;
+  if (entry && entry.expiresAt > Date.now()) return false;
+  db[key] = { expiresAt: Date.now() + ttlSeconds * 1000 };
+  await writeFileDb(db);
+  return true;
+}
+
+/** Acrescenta `value` ao início da lista `key`, guardando só os `max` mais recentes. */
+export async function pushLog(key: string, value: unknown, max: number) {
+  if (redisUrl) {
+    await redis("LPUSH", key, JSON.stringify(value));
+    await redis("LTRIM", key, "0", String(max - 1));
+  } else {
+    const db = await readFileDb();
+    db[key] = [value, ...((db[key] ?? []) as unknown[])].slice(0, max);
+    await writeFileDb(db);
+  }
+}
+
+export async function readLog<T>(key: string): Promise<T[]> {
+  if (redisUrl) return (await redis<string[]>("LRANGE", key, "0", "-1")).map((v) => JSON.parse(v));
+  return ((await readFileDb())[key] ?? []) as T[];
 }

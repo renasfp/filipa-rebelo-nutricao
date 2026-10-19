@@ -2,6 +2,7 @@
 
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { clientIp } from "@/lib/rate-limit";
 import { deleteKey, getCounter, incrementCounter } from "@/lib/store";
 import {
   checkSitePassword,
@@ -18,8 +19,7 @@ export async function enterSite(_prev: string | null, formData: FormData): Promi
   const token = siteAccessToken();
   if (!token) redirect("/");
 
-  const h = await headers();
-  const ip = h.get("x-real-ip") ?? h.get("x-forwarded-for")?.split(",")[0].trim() ?? "desconhecido";
+  const ip = clientIp(await headers());
   const key = `site-fails:${ip}`;
   const blocked = `Demasiadas tentativas falhadas. Tente de novo daqui a ${WINDOW_SECONDS / 60} minutos.`;
 

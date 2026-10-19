@@ -1,7 +1,9 @@
 import type { NextRequest } from "next/server";
 import { getAvailability } from "@/lib/booking/availability";
+import { clientIp, hitLimit, tooManyRequests } from "@/lib/rate-limit";
 
 export async function GET(request: NextRequest) {
+  if (await hitLimit("disponibilidade", clientIp(request.headers), 60, 60)) return tooManyRequests();
   const locationId = request.nextUrl.searchParams.get("local") ?? "";
   try {
     const result = await getAvailability(locationId);

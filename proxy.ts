@@ -11,7 +11,9 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Rotas com autenticação própria: /api/nutrium (token da extensão do Chrome),
-  // /api/calcom (assinatura dos webhooks) e /api/lembretes (CRON_SECRET).
-  matcher: ["/((?!em-construcao|api/nutrium|api/calcom|api/lembretes|_next/static|_next/image|images/|favicon.ico).*)"],
+  // Rotas com autenticação própria: /backoffice (login com 2FA), /api/nutrium (token da extensão
+  // do Chrome), /api/calcom (assinatura dos webhooks) e /api/lembretes (CRON_SECRET).
+  matcher: [
+    "/((?!em-construcao|backoffice|api/nutrium|api/calcom|api/lembretes|_next/static|_next/image|images/|favicon.ico).*)",
+  ],
 };

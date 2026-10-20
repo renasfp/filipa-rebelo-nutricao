@@ -1,0 +1,409 @@
+/* Backoffice — pensado primeiro para telemóvel. Usa as cores do site (globals.css). */
+.bo {
+  --bo-alta: #a4473b;
+  --bo-alta-pale: #f6e4e1;
+  --bo-media: #a8741a;
+  --bo-media-pale: #f6ecd9;
+  --bo-info: #46679a;
+  --bo-info-pale: #e3eaf5;
+  min-height: 100svh;
+  background: var(--cream);
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.bo h1,
+.bo h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+}
+
+.bo h1 {
+  font-size: 1.9rem;
+}
+
+.bo h2 {
+  font-size: 1.35rem;
+  margin: 1.6rem 0 0.6rem;
+}
+
+.bo-muted {
+  color: var(--stone);
+}
+
+.bo-small {
+  font-size: 0.82rem;
+}
+
+/* ─── Entrada (login, 2FA, configurar) ─── */
+.bo-auth {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+}
+
+.bo-auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--white);
+  border: 1px solid var(--linen);
+  border-radius: 18px;
+  padding: 1.8rem;
+}
+
+.bo-auth-card h1 {
+  margin: 0.8rem 0 0.4rem;
+}
+
+.bo-auth-card > p {
+  margin-bottom: 1.2rem;
+}
+
+.bo-qr {
+  display: block;
+  margin: 0.5rem auto 0.8rem;
+  width: 200px;
+  height: 200px;
+}
+
+.bo-secret {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  word-break: break-all;
+  background: var(--cream);
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+  margin-bottom: 1rem;
+}
+
+/* ─── Formulários ─── */
+.bo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.bo-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--stone);
+}
+
+.bo input:not([type="checkbox"]):not([type="radio"]),
+.bo select,
+.bo textarea {
+  font: inherit;
+  color: var(--ink);
+  border: 1px solid var(--linen);
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  background: var(--white);
+  width: 100%;
+}
+
+.bo input:focus,
+.bo select:focus,
+.bo textarea:focus {
+  outline: 2px solid var(--sage-light);
+  border-color: var(--sage);
+}
+
+.bo-code {
+  font-size: 1.5rem !important;
+  letter-spacing: 0.4em;
+  text-align: center;
+}
+
+.bo-error {
+  color: var(--bo-alta);
+  font-size: 0.88rem;
+}
+
+.bo-ok {
+  color: var(--sage-deep);
+  font-size: 0.88rem;
+}
+
+.bo-btn {
+  font: inherit;
+  font-weight: 500;
+  border: none;
+  border-radius: 50px;
+  padding: 0.6rem 1.2rem;
+  background: var(--sage-deep);
+  color: var(--white);
+  cursor: pointer;
+}
+
+.bo-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.bo-btn-ghost {
+  background: var(--white);
+  color: var(--ink);
+  border: 1px solid var(--linen);
+}
+
+.bo-btn-danger {
+  background: var(--white);
+  color: var(--bo-alta);
+  border: 1px solid currentColor;
+}
+
+.bo-btn-small {
+  font-size: 0.82rem;
+  padding: 0.35rem 0.85rem;
+}
+
+/* ─── Painel ─── */
+.bo-top {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--white);
+  border-bottom: 1px solid var(--linen);
+}
+
+.bo-top-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0.7rem 1rem 0;
+}
+
+.bo-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bo-brand {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+}
+
+.bo-brand span {
+  color: var(--sage-deep);
+  font-style: italic;
+}
+
+.bo-user {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--stone);
+}
+
+.bo-nav {
+  display: flex;
+  gap: 0.2rem;
+  overflow-x: auto;
+  margin-top: 0.4rem;
+  scrollbar-width: none;
+}
+
+.bo-nav a {
+  white-space: nowrap;
+  padding: 0.55rem 0.8rem;
+  border-bottom: 2px solid transparent;
+  color: var(--stone);
+  font-size: 0.92rem;
+}
+
+.bo-nav a[aria-current="page"] {
+  color: var(--ink);
+  border-bottom-color: var(--sage-deep);
+  font-weight: 500;
+}
+
+.bo-badge {
+  display: inline-block;
+  min-width: 1.4em;
+  padding: 0 0.4em;
+  margin-left: 0.3em;
+  border-radius: 99px;
+  background: var(--bo-alta);
+  color: var(--white);
+  font-size: 0.72rem;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.bo-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.2rem 1rem 4rem;
+}
+
+.bo-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.bo-tabs a {
+  border: 1px solid var(--linen);
+  border-radius: 99px;
+  padding: 0.3rem 0.9rem;
+  background: var(--white);
+  font-size: 0.88rem;
+}
+
+.bo-tabs a[aria-current="page"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--white);
+}
+
+.bo .bo-day {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--stone);
+  margin: 1.4rem 0 0.5rem;
+}
+
+.bo-card {
+  background: var(--white);
+  border: 1px solid var(--linen);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.bo-booking {
+  display: grid;
+  grid-template-columns: 3.6rem 1fr;
+  gap: 0.2rem 0.9rem;
+}
+
+.bo-booking time {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.bo-booking-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.bo-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+}
+
+.bo-chip {
+  font-size: 0.74rem;
+  border-radius: 99px;
+  padding: 0.05rem 0.55rem;
+  background: var(--linen);
+  color: var(--stone);
+}
+
+.bo-chip-ok { background: var(--sage-pale); color: var(--sage-deep); }
+.bo-chip-alta { background: var(--bo-alta-pale); color: var(--bo-alta); }
+.bo-chip-media { background: var(--bo-media-pale); color: var(--bo-media); }
+.bo-chip-info { background: var(--bo-info-pale); color: var(--bo-info); }
+
+.bo-problem {
+  border-left: 4px solid var(--bo-info);
+}
+
+.bo-problem-alta { border-left-color: var(--bo-alta); }
+.bo-problem-media { border-left-color: var(--bo-media); }
+
+.bo-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--stone);
+}
+
+.bo-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  background: var(--white);
+  border: 1px solid var(--linen);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.bo-table th,
+.bo-table td {
+  text-align: left;
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid var(--linen);
+  vertical-align: top;
+}
+
+.bo-table th {
+  font-weight: 600;
+  color: var(--stone);
+  background: var(--cream);
+}
+
+.bo-table-wrap {
+  overflow-x: auto;
+}
+
+.bo-inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.bo-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.9rem;
+}
+
+.bo-notice {
+  background: var(--sage-pale);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  margin: 1rem 0;
+}
+
+.bo-notice code {
+  font-size: 1.05rem;
+  font-weight: 600;
+  user-select: all;
+}
+
+details.bo-details summary {
+  cursor: pointer;
+  color: var(--stone);
+  font-size: 0.85rem;
+}
+
+@media (min-width: 700px) {
+  .bo-grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .bo-booking {
+    grid-template-columns: 4rem 1fr auto;
+  }
+
+  .bo-booking-actions {
+    grid-column: 3;
+    grid-row: 1 / span 3;
+    margin-top: 0;
+    align-items: flex-start;
+  }
+}

@@ -33,7 +33,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav>
+      <nav className="site-nav">
         <div className="nav-inner">
           <Link href="/" className="nav-logo">
             Filipa Rebelo <span>Nutricionista</span>

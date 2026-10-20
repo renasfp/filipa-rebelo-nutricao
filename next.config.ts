@@ -32,6 +32,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Postgres embutido (WebAssembly) usado em desenvolvimento quando não há DATABASE_URL.
+  serverExternalPackages: ["@electric-sql/pglite"],
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },

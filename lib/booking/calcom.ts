@@ -149,6 +149,15 @@ export async function cancelBooking(uid: string, reason: string) {
   });
 }
 
+/** Recusa uma marcação pendente (a cliente é avisada por email pelo Cal.com). */
+export async function declineBooking(uid: string, reason: string) {
+  return cal<CalBooking>(`/bookings/${uid}/decline`, "2024-08-13", {
+    method: "POST",
+    auth: true,
+    body: JSON.stringify({ reason }),
+  });
+}
+
 /** Remarca; o Cal.com cria uma marcação nova (novo uid) e cancela a antiga. */
 export async function rescheduleBooking(uid: string, start: Date, reason: string) {
   return cal<CalBooking>(`/bookings/${uid}/reschedule`, "2024-08-13", {

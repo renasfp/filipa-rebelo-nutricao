@@ -1,6 +1,6 @@
 import { getCounter, incrementCounter } from "./store";
 
-// Limites de pedidos por IP (janela fixa, contadores no Redis). Se o Redis falhar, não bloqueia:
+// Limites de pedidos por IP (janela fixa, contadores no Postgres). Se a BD falhar, não bloqueia:
 // é preferível deixar passar do que deitar o site abaixo.
 
 type HeaderSource = { get(name: string): string | null };

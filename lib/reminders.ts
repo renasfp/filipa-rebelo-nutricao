@@ -1,6 +1,8 @@
 import { listBookings } from "./booking/calcom";
 import { TIMEZONE } from "./booking/time";
-import { claimOnce, deleteKey, pushLog, readLog } from "./store";
+import { desc } from "drizzle-orm";
+import { getDb, schema } from "./db";
+import { claimOnce, releaseClaim } from "./store";
 
 // Lembrete às clientes ~48h antes da consulta (corre de hora a hora, ver app/api/lembretes/route.ts).
 // REMINDER_MODE: "simulacao" (por defeito — só regista o que enviaria) ou "whatsapp" (Meta Cloud API,
@@ -12,7 +14,7 @@ const EARLIEST_HOURS = 48;
 const LATEST_HOURS = 30;
 const QUIET_END = 9;
 const QUIET_START = 21;
-const LOG_KEY = "lembretes:log";
+const LOG_LIMIT = 300;
 
 export type ReminderMode = "simulacao" | "whatsapp";
 
@@ -143,13 +145,21 @@ export async function runReminders(now = new Date()): Promise<ReminderRun> {
       entry.error = (err as Error).message;
       run.failed++;
       console.error("[lembretes]", b.uid, err);
-      await deleteKey(claim); // volta a tentar na hora seguinte, enquanto estiver na janela
+      await releaseClaim(claim); // volta a tentar na hora seguinte, enquanto estiver na janela
     }
-    await pushLog(LOG_KEY, entry, 300);
+    const db = await getDb();
+    await db.insert(schema.reminderLog).values({ ...entry, at: new Date(entry.at), error: entry.error ?? null });
   }
   return run;
 }
 
-export function reminderLog() {
-  return readLog<ReminderLogEntry>(LOG_KEY);
+export async function reminderLog(): Promise<ReminderLogEntry[]> {
+  const db = await getDb();
+  const l = schema.reminderLog;
+  const rows = await db
+    .select({ at: l.at, mode: l.mode, uid: l.uid, start: l.start, telefone: l.telefone, ok: l.ok, error: l.error, texto: l.texto })
+    .from(l)
+    .orderBy(desc(l.at))
+    .limit(LOG_LIMIT);
+  return rows.map((r) => ({ ...r, at: r.at.toISOString(), error: r.error ?? undefined }));
 }

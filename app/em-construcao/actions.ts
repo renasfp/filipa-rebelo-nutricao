@@ -3,7 +3,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { clientIp } from "@/lib/rate-limit";
-import { deleteKey, getCounter, incrementCounter } from "@/lib/store";
+import { getCounter, incrementCounter, resetCounter } from "@/lib/store";
 import {
   checkSitePassword,
   safeNextPath,
@@ -30,7 +30,7 @@ export async function enterSite(_prev: string | null, formData: FormData): Promi
     return left > 0 ? `Palavra-passe incorreta. Restam ${left} tentativa${left === 1 ? "" : "s"}.` : blocked;
   }
 
-  await deleteKey(key);
+  await resetCounter(key);
   (await cookies()).set(SITE_ACCESS_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

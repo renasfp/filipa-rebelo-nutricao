@@ -54,3 +54,62 @@ export const auditLog = pgTable(
 
 export type User = typeof users.$inferSelect;
 export type Role = User["role"];
+
+// ─── Estado operacional (antes no Redis) ───────────────────────────────
+
+/** Contadores com expiração: limites de pedidos e de tentativas. */
+export const rateLimits = pgTable("rate_limits", {
+  key: text("key").primaryKey(),
+  count: integer("count").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+});
+
+/** Chaves de idempotência: um evento (webhook, lembrete…) só é processado uma vez. */
+export const idempotencyKeys = pgTable("idempotency_keys", {
+  key: text("key").primaryKey(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+});
+
+/** Ligação marcação do Cal.com ↔ consulta e cliente no Nutrium (extensão do Chrome). */
+export const nutriumSync = pgTable("nutrium_sync", {
+  uid: text("uid").primaryKey(),
+  nutriumId: text("nutrium_id").notNull(),
+  patientId: text("patient_id").notNull(),
+  /** Versão da marcação quando foi sincronizada (ver lib/nutrium-sync.ts). */
+  version: text("version").notNull(),
+  syncedAt: timestamp("synced_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Webhooks recebidos do Cal.com (sem dados pessoais da cliente). */
+export const webhookEvents = pgTable(
+  "webhook_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    receivedAt: timestamp("received_at", { withTimezone: true }).notNull().defaultNow(),
+    triggerEvent: text("trigger_event").notNull(),
+    uid: text("uid"),
+    status: text("status"),
+    startTime: text("start_time"),
+    rescheduleUid: text("reschedule_uid"),
+    duplicate: boolean("duplicate").notNull().default(false),
+  },
+  (t) => [index("webhook_events_received_idx").on(t.receivedAt)],
+);
+
+/** Lembretes enviados ou simulados. */
+export const reminderLog = pgTable(
+  "reminder_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    at: timestamp("at", { withTimezone: true }).notNull().defaultNow(),
+    mode: text("mode", { enum: ["simulacao", "whatsapp"] }).notNull(),
+    uid: text("uid").notNull(),
+    start: text("start").notNull(),
+    /** Só os últimos dígitos do telefone. */
+    telefone: text("telefone").notNull(),
+    ok: boolean("ok").notNull(),
+    error: text("error"),
+    texto: text("texto").notNull(),
+  },
+  (t) => [index("reminder_log_at_idx").on(t.at)],
+);

@@ -1,12 +1,13 @@
 import { createHash, createHmac, timingSafeEqual } from "crypto";
-import { claimOnce, pushLog, readLog } from "./store";
+import { desc } from "drizzle-orm";
+import { getDb, schema } from "./db";
+import { claimOnce } from "./store";
 
 // Webhooks do Cal.com (Settings → Developer → Webhooks), assinados com CALCOM_WEBHOOK_SECRET.
 // Para já só regista os eventos; os fluxos que dependem deles (cancelamentos, pagamentos,
 // lembretes) passam a reagir aqui.
 
-const LOG_KEY = "calcom:webhooks";
-const LOG_MAX = 200;
+const LOG_LIMIT = 200;
 const DEDUPE_SECONDS = 7 * 86400;
 
 export interface CalWebhookEvent {
@@ -51,22 +52,33 @@ export async function recordEvent(event: CalWebhookEvent): Promise<boolean> {
     .update(`${event.triggerEvent}|${p.uid ?? p.bookingId ?? ""}|${event.createdAt}`)
     .digest("hex");
   const fresh = await claimOnce(`calcom:webhook:${id}`, DEDUPE_SECONDS);
-  await pushLog(
-    LOG_KEY,
-    {
-      receivedAt: new Date().toISOString(),
-      triggerEvent: event.triggerEvent,
-      uid: p.uid ?? null,
-      status: p.status ?? null,
-      startTime: p.startTime ?? null,
-      rescheduleUid: p.rescheduleUid ?? null,
-      duplicate: !fresh,
-    } satisfies CalWebhookLogEntry,
-    LOG_MAX,
-  );
+  const db = await getDb();
+  await db.insert(schema.webhookEvents).values({
+    triggerEvent: event.triggerEvent,
+    uid: p.uid ?? null,
+    status: p.status ?? null,
+    startTime: p.startTime ?? null,
+    rescheduleUid: p.rescheduleUid ?? null,
+    duplicate: !fresh,
+  });
   return fresh;
 }
 
-export function recentEvents() {
-  return readLog<CalWebhookLogEntry>(LOG_KEY);
+export async function recentEvents(): Promise<CalWebhookLogEntry[]> {
+  const db = await getDb();
+  const e = schema.webhookEvents;
+  const rows = await db
+    .select({
+      receivedAt: e.receivedAt,
+      triggerEvent: e.triggerEvent,
+      uid: e.uid,
+      status: e.status,
+      startTime: e.startTime,
+      rescheduleUid: e.rescheduleUid,
+      duplicate: e.duplicate,
+    })
+    .from(e)
+    .orderBy(desc(e.receivedAt))
+    .limit(LOG_LIMIT);
+  return rows.map((r) => ({ ...r, receivedAt: r.receivedAt.toISOString() }));
 }

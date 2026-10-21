@@ -8,12 +8,12 @@ import {
   type CalBookingDetails,
 } from "./booking/calcom";
 import { clientIp, countFailure, overLimit, tooManyRequests } from "./rate-limit";
-import { getMap, setMapEntry } from "./store";
+import { getDb, schema } from "./db";
+import { readLegacyNutriumSync } from "./legacy-redis";
 
 // Ponte entre o Cal.com e a extensão do Chrome que cria as consultas no Nutrium.
 // A extensão autentica-se com NUTRIUM_SYNC_TOKEN; a API key do Cal.com nunca sai do servidor.
 
-const SYNC_KEY = "nutrium:sync";
 const LOOKBACK_DAYS = 7;
 
 const STATUS: Record<string, SyncBooking["status"]> = {
@@ -100,20 +100,60 @@ function normalize(b: CalBookingDetails, titles: Map<string, string>, synced: Sy
   return { ...data, version, synced: synced ?? null };
 }
 
+let legacyImported = false;
+
+/** TEMPORÁRIO (4.11): na primeira leitura com a tabela vazia, copia a ligação que estava no Redis. */
+async function importLegacyOnce() {
+  if (legacyImported) return;
+  legacyImported = true;
+  const db = await getDb();
+  const [any] = await db.select({ uid: schema.nutriumSync.uid }).from(schema.nutriumSync).limit(1);
+  if (any) return;
+  const legacy = await readLegacyNutriumSync().catch((err) => {
+    console.error("[nutrium] não foi possível ler o Redis antigo", err);
+    return {};
+  });
+  // Entradas antigas sem patientId também entram (vazio): sem elas a extensão voltaria a criar a consulta.
+  const rows = Object.entries(legacy)
+    .filter(([, s]) => s.nutriumId && s.version)
+    .map(([uid, s]) => ({
+      uid,
+      nutriumId: s.nutriumId,
+      patientId: s.patientId ?? "",
+      version: s.version,
+      syncedAt: s.syncedAt ? new Date(s.syncedAt) : new Date(),
+    }));
+  if (rows.length) await db.insert(schema.nutriumSync).values(rows).onConflictDoNothing();
+  console.info(`[nutrium] importadas ${rows.length} ligações do Redis`);
+}
+
+async function syncStates(): Promise<Record<string, SyncState>> {
+  await importLegacyOnce();
+  const db = await getDb();
+  const rows = await db.select().from(schema.nutriumSync);
+  return Object.fromEntries(
+    rows.map((r) => [
+      r.uid,
+      { nutriumId: r.nutriumId, patientId: r.patientId, version: r.version, syncedAt: r.syncedAt.toISOString() },
+    ]),
+  );
+}
+
 /** Marcações desde há uma semana, com o estado da última sincronização de cada uma. */
 export async function listSyncBookings(): Promise<SyncBooking[]> {
   const since = new Date(Date.now() - LOOKBACK_DAYS * 86400000);
-  const [bookings, types, state] = await Promise.all([
-    listBookings(since),
-    listEventTypes(),
-    getMap<SyncState>(SYNC_KEY),
-  ]);
+  const [bookings, types, state] = await Promise.all([listBookings(since), listEventTypes(), syncStates()]);
   const titles = new Map(types.map((t) => [t.slug, t.title]));
   return bookings.map((b) => normalize(b, titles, state[b.uid]));
 }
 
 export async function markSynced(uid: string, state: Omit<SyncState, "syncedAt">) {
-  await setMapEntry(SYNC_KEY, uid, { ...state, syncedAt: new Date().toISOString() } satisfies SyncState);
+  const db = await getDb();
+  const row = { ...state, syncedAt: new Date() };
+  await db
+    .insert(schema.nutriumSync)
+    .values({ uid, ...row })
+    .onConflictDoUpdate({ target: schema.nutriumSync.uid, set: row });
 }
 
 export type CalAction = "confirm" | "cancel" | "reschedule";

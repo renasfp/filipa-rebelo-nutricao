@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { PaymentError, startPayment } from "@/lib/payments";
-import { EupagoError } from "@/lib/payments/eupago";
+import { EupagoConfigError, EupagoError } from "@/lib/payments/eupago";
 import { clientIp, hitLimit } from "@/lib/rate-limit";
 
 export async function startPaymentAction(uid: string, method: "mbway" | "multibanco", phone: string) {
@@ -15,6 +15,9 @@ export async function startPaymentAction(uid: string, method: "mbway" | "multiba
   } catch (err) {
     if (err instanceof PaymentError) return err.message;
     console.error("[pagamento]", err);
+    if (err instanceof EupagoConfigError) {
+      return "Os pagamentos online ainda não estão disponíveis. Contacta-nos para concluir a marcação.";
+    }
     return err instanceof EupagoError
       ? "A EuPago não aceitou o pedido. Confirma o número ou tenta outro método."
       : "Não foi possível iniciar o pagamento. Tenta de novo daqui a pouco.";

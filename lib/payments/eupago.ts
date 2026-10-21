@@ -12,11 +12,13 @@ function baseUrl() {
 
 function apiKey() {
   const key = process.env.EUPAGO_API_KEY;
-  if (!key) throw new EupagoError("EUPAGO_API_KEY não está configurada.");
+  if (!key) throw new EupagoConfigError("EUPAGO_API_KEY não está configurada.");
   return key;
 }
 
 export class EupagoError extends Error {}
+/** Falta configuração no servidor (não é culpa da cliente nem da EuPago). */
+export class EupagoConfigError extends EupagoError {}
 
 async function post<T>(path: string, body: object, headers: Record<string, string> = {}): Promise<T> {
   const res = await fetch(`${baseUrl()}${path}`, {
@@ -81,7 +83,7 @@ export interface EupagoWebhookTransaction {
 
 function webhookKey() {
   const key = process.env.EUPAGO_WEBHOOK_KEY;
-  if (!key) throw new EupagoError("EUPAGO_WEBHOOK_KEY não está configurada.");
+  if (!key) throw new EupagoConfigError("EUPAGO_WEBHOOK_KEY não está configurada.");
   return key;
 }
 

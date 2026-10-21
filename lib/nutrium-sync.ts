@@ -9,7 +9,6 @@ import {
 } from "./booking/calcom";
 import { clientIp, countFailure, overLimit, tooManyRequests } from "./rate-limit";
 import { getDb, schema } from "./db";
-import { readLegacyNutriumSync } from "./legacy-redis";
 
 // Ponte entre o Cal.com e a extensão do Chrome que cria as consultas no Nutrium.
 // A extensão autentica-se com NUTRIUM_SYNC_TOKEN; a API key do Cal.com nunca sai do servidor.
@@ -100,35 +99,7 @@ function normalize(b: CalBookingDetails, titles: Map<string, string>, synced: Sy
   return { ...data, version, synced: synced ?? null };
 }
 
-let legacyImported = false;
-
-/** TEMPORÁRIO (4.11): na primeira leitura com a tabela vazia, copia a ligação que estava no Redis. */
-async function importLegacyOnce() {
-  if (legacyImported) return;
-  legacyImported = true;
-  const db = await getDb();
-  const [any] = await db.select({ uid: schema.nutriumSync.uid }).from(schema.nutriumSync).limit(1);
-  if (any) return;
-  const legacy = await readLegacyNutriumSync().catch((err) => {
-    console.error("[nutrium] não foi possível ler o Redis antigo", err);
-    return {};
-  });
-  // Entradas antigas sem patientId também entram (vazio): sem elas a extensão voltaria a criar a consulta.
-  const rows = Object.entries(legacy)
-    .filter(([, s]) => s.nutriumId && s.version)
-    .map(([uid, s]) => ({
-      uid,
-      nutriumId: s.nutriumId,
-      patientId: s.patientId ?? "",
-      version: s.version,
-      syncedAt: s.syncedAt ? new Date(s.syncedAt) : new Date(),
-    }));
-  if (rows.length) await db.insert(schema.nutriumSync).values(rows).onConflictDoNothing();
-  console.info(`[nutrium] importadas ${rows.length} ligações do Redis`);
-}
-
 async function syncStates(): Promise<Record<string, SyncState>> {
-  await importLegacyOnce();
   const db = await getDb();
   const rows = await db.select().from(schema.nutriumSync);
   return Object.fromEntries(

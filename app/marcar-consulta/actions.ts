@@ -5,6 +5,7 @@ import { customFields, getAvailability, isSlotFree } from "@/lib/booking/availab
 import { CalError, createBooking } from "@/lib/booking/calcom";
 import { lisbonToUtc, todayInLisbon } from "@/lib/booking/time";
 import { GENDERS } from "@/lib/booking/types";
+import { priceFor } from "@/lib/payments";
 import { clientIp, hitLimit } from "@/lib/rate-limit";
 
 export interface BookingFormState {
@@ -12,6 +13,8 @@ export interface BookingFormState {
   message?: string;
   /** Marcação criada mas a aguardar confirmação da nutricionista. */
   pending?: boolean;
+  /** Página de pagamento (quando a consulta tem preço definido). */
+  paymentUrl?: string;
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -89,6 +92,7 @@ export async function requestBooking(
 
     if (!(await isSlotFree(availability.type, date, time))) return SLOT_TAKEN;
 
+    const price = await priceFor(availability.type.slug);
     const booking = await createBooking({
       eventTypeId: availability.type.id,
       start: lisbonToUtc(date, time),
@@ -100,8 +104,13 @@ export async function requestBooking(
       birthdate,
       gender,
       reminders: formData.get("reminders") === "sim",
+      requiresPayment: price !== null,
     });
-    return { status: "success", pending: booking.status !== "accepted" };
+    const pending = booking.status !== "accepted";
+    if (pending && price !== null) {
+      return { status: "success", pending, paymentUrl: `/marcar-consulta/pagamento/${booking.uid}` };
+    }
+    return { status: "success", pending };
   } catch (err) {
     console.error("[marcar-consulta]", err);
     // O Cal.com recusa com 4xx quando o horário deixou de estar disponível entretanto.

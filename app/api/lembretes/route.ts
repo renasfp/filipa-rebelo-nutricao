@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { createHash, timingSafeEqual } from "crypto";
+import { releaseExpiredBookings } from "@/lib/payments";
 import { runReminders } from "@/lib/reminders";
 
 // Chamado de hora a hora por um cron externo (ex.: cron-job.org; o cron da Vercel no plano
@@ -18,7 +19,11 @@ export async function GET(request: NextRequest) {
     return Response.json({ error: "Não autorizado" }, { status: 401 });
   }
   try {
-    return Response.json(await runReminders());
+    const released = await releaseExpiredBookings({ force: true }).catch((err) => {
+      console.error("[pagamentos] libertar", err);
+      return null;
+    });
+    return Response.json({ ...(await runReminders()), libertadas: released?.released ?? null });
   } catch (err) {
     console.error("[lembretes]", err);
     return Response.json({ error: "Falha ao processar os lembretes" }, { status: 500 });

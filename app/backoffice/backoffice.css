@@ -623,3 +623,14 @@ details.bo-details summary {
   white-space: normal;
   overflow: visible;
 }
+
+.bo-price-input {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.bo-price-input input {
+  width: 7rem !important;
+  text-align: right;
+}

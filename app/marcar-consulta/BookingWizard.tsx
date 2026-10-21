@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { describeWeekdays, GENDERS, type AvailableDay, type BookingField, type Location } from "@/lib/booking/types";
 import { formatDateLong } from "@/lib/booking/time";
@@ -85,9 +86,11 @@ export default function BookingWizard({ locations }: { locations: Location[] }) 
   const [month, setMonth] = useState("");
   const [date, setDate] = useState<string | null>(null);
   const [time, setTime] = useState<string | null>(null);
+  const router = useRouter();
   const [state, formAction, pending] = useActionState<BookingFormState, FormData>(
     async (prev, formData) => {
       const result = await requestBooking(prev, formData);
+      if (result.paymentUrl) router.push(result.paymentUrl);
       if (result.status === "slot-taken") {
         setTime(null);
         setReloadKey((k) => k + 1);
@@ -125,6 +128,14 @@ export default function BookingWizard({ locations }: { locations: Location[] }) 
     setMonth("");
     setDate(null);
     setTime(null);
+  }
+
+  if (state.status === "success" && state.paymentUrl) {
+    return (
+      <div className="booking-card booking-success">
+        <p className="booking-muted">A abrir o pagamento…</p>
+      </div>
+    );
   }
 
   if (state.status === "success") {

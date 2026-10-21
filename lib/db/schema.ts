@@ -136,3 +136,44 @@ export const appState = pgTable("app_state", {
   value: jsonb("value").notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// ─── Pagamentos (EuPago) ───────────────────────────────
+
+/** Preço de cada tipo de consulta (slug do tipo de evento no Cal.com), definido no backoffice. */
+export const prices = pgTable("prices", {
+  eventTypeSlug: text("event_type_slug").primaryKey(),
+  /** Em cêntimos. */
+  amountCents: integer("amount_cents").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedBy: uuid("updated_by").references(() => users.id, { onDelete: "set null" }),
+});
+
+export type PaymentStatus = "pendente" | "pago" | "expirado" | "cancelado" | "erro" | "reembolsado";
+
+/** Cada tentativa de pagamento de uma marcação (pode haver várias, ex.: MB WAY que expirou). */
+export const payments = pgTable(
+  "payments",
+  {
+    /** Também é o "identifier" enviado à EuPago (volta no webhook). */
+    id: uuid("id").primaryKey().defaultRandom(),
+    bookingUid: text("booking_uid").notNull(),
+    method: text("method", { enum: ["mbway", "multibanco"] }).notNull(),
+    amountCents: integer("amount_cents").notNull(),
+    status: text("status").$type<PaymentStatus>().notNull().default("pendente"),
+    /** MB WAY: transactionID; ambos: trid do webhook quando chega. */
+    transactionId: text("transaction_id"),
+    entity: text("entity"),
+    reference: text("reference"),
+    /** Últimos dígitos do telemóvel (MB WAY). */
+    phoneHint: text("phone_hint"),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+    /** Pagamento recebido depois de a marcação já ter sido libertada (tem de ser devolvido à mão). */
+    lateAfterRelease: boolean("late_after_release").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("payments_booking_idx").on(t.bookingUid), index("payments_created_idx").on(t.createdAt)],
+);
+
+export type Payment = typeof payments.$inferSelect;

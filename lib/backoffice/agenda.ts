@@ -8,6 +8,7 @@ import {
   nutriumAgendaUpdatedAt,
   type SyncBooking,
 } from "@/lib/nutrium-sync";
+import { listPrices, recentPayments } from "@/lib/payments";
 import { reminderLog, reminderMode } from "@/lib/reminders";
 
 // Dados dos ecrãs "Agenda" e "Problemas": marcações do Cal.com com o estado no Nutrium.
@@ -80,6 +81,24 @@ export async function findProblems(isAdmin: boolean): Promise<Problem[]> {
         uid: b.uid,
       });
     }
+  }
+
+  for (const p of await recentPayments(100)) {
+    if (!p.lateAfterRelease || p.status !== "pago") continue;
+    problems.push({
+      severity: "alta",
+      title: "Pagamento recebido depois de a marcação ser libertada",
+      detail: `${(p.amountCents / 100).toFixed(2)} € por ${p.method === "mbway" ? "MB WAY" : "Multibanco"} em ${when(p.paidAt!.toISOString())}. Contacta a cliente para remarcar ou devolver o valor (ver Pagamentos).`,
+      uid: p.bookingUid,
+    });
+  }
+  for (const t of await listPrices().catch(() => [])) {
+    if (t.amountCents !== null) continue;
+    problems.push({
+      severity: "info",
+      title: `Sem preço: ${t.title}`,
+      detail: "As marcações deste tipo não pedem pagamento e ficam pendentes para confirmar à mão (ver Preços).",
+    });
   }
 
   const weekAgo = now - 7 * 86400000;

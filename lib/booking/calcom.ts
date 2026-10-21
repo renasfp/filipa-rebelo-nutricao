@@ -46,6 +46,8 @@ export interface CalBooking {
 }
 
 export interface CalBookingDetails extends CalBooking {
+  /** Ex.: "Primeira Consulta entre Filipa Rebelo e Ana". */
+  title: string;
   start: string;
   end: string;
   eventType: { id: number; slug: string };
@@ -53,6 +55,7 @@ export interface CalBookingDetails extends CalBooking {
   bookingFieldsResponses: Record<string, unknown>;
   metadata?: Record<string, string>;
   rescheduledToUid?: string | null;
+  createdAt?: string;
 }
 
 export class CalError extends Error {
@@ -137,6 +140,16 @@ export async function listBookings(afterStart: Date, beforeEnd?: Date): Promise<
   }
 }
 
+/** Uma marcação pelo uid (null se não existir). Exige API key. */
+export async function getBooking(uid: string): Promise<CalBookingDetails | null> {
+  try {
+    return await cal<CalBookingDetails>(`/bookings/${encodeURIComponent(uid)}`, "2024-08-13", { auth: true });
+  } catch (err) {
+    if (err instanceof CalError && err.status === 404) return null;
+    throw err;
+  }
+}
+
 /** Ações da profissional sobre uma marcação existente (exigem API key). */
 export async function confirmBooking(uid: string) {
   return cal<CalBooking>(`/bookings/${uid}/confirm`, "2024-08-13", { method: "POST", auth: true });
@@ -181,6 +194,8 @@ export async function createBooking(input: {
   gender: string;
   /** A cliente aceitou receber o lembrete 48h antes (WhatsApp/SMS). */
   reminders: boolean;
+  /** A marcação só é confirmada depois do pagamento (EuPago). */
+  requiresPayment: boolean;
 }): Promise<CalBooking> {
   return cal<CalBooking>("/bookings", "2024-08-13", {
     method: "POST",
@@ -201,6 +216,7 @@ export async function createBooking(input: {
         nascimento: input.birthdate,
         genero: input.gender,
         lembretes: input.reminders ? "sim" : "nao",
+        pagamento: input.requiresPayment ? "sim" : "nao",
       },
     }),
   });

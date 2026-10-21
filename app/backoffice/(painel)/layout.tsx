@@ -50,6 +50,8 @@ export default async function PanelLayout({ children }: LayoutProps<"/backoffice
                     </>
                   ),
                 },
+                { href: "/backoffice/pagamentos", label: "Pagamentos" },
+                { href: "/backoffice/precos", label: "Preços" },
                 { href: "/backoffice/registos", label: "Registos" },
                 ...(isAdmin ? [{ href: "/backoffice/utilizadores", label: "Utilizadores" }] : []),
                 { href: "/backoffice/conta", label: "Conta" },

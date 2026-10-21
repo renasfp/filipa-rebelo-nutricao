@@ -1314,3 +1314,79 @@ footer h5 {
     grid-template-columns: 1fr;
   }
 }
+
+/* ─── Pagamento ─── */
+.pay-methods {
+  display: grid;
+  gap: 1rem;
+  margin: 1.2rem 0;
+}
+
+.pay-method {
+  border: 1px solid var(--linen);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.pay-method label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--stone);
+}
+
+.pay-method input {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  border: 1px solid var(--linen);
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+}
+
+.pay-ref {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4rem 1.2rem;
+  margin: 1rem 0 1.2rem;
+  font-size: 1.05rem;
+}
+
+.pay-ref dt {
+  color: var(--stone);
+}
+
+.pay-ref dd {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+
+.pay-waiting {
+  text-align: center;
+}
+
+.pay-spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  border: 3px solid var(--sage-pale);
+  border-top-color: var(--sage-deep);
+  animation: pay-spin 0.9s linear infinite;
+}
+
+@keyframes pay-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (min-width: 700px) {
+  .pay-methods {
+    grid-template-columns: 1fr 1fr;
+  }
+}

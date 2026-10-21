@@ -9,6 +9,7 @@ import { endAllSessions, verifySession } from "@/lib/backoffice/session";
 import { CalError, cancelBooking, confirmBooking, declineBooking } from "@/lib/booking/calcom";
 import { getDb, schema } from "@/lib/db";
 import type { Role } from "@/lib/db/schema";
+import { setPrice } from "@/lib/payments";
 
 const MIN_PASSWORD = 12;
 
@@ -124,4 +125,23 @@ export async function userAction(
   } catch (err) {
     return { error: (err as Error).message };
   }
+}
+
+// ─── Preços ───────────────────────────────
+
+export async function savePrice(_prev: string | null, formData: FormData): Promise<string | null> {
+  const user = await verifySession();
+  const slug = String(formData.get("slug") ?? "");
+  const raw = String(formData.get("price") ?? "").trim().replace(",", ".");
+  if (!/^[a-z0-9-]{1,100}$/.test(slug)) return "Tipo de consulta inválido.";
+  let cents: number | null = null;
+  if (raw) {
+    const value = Number(raw);
+    if (!Number.isFinite(value) || value < 1 || value > 1000) return "Indica um preço entre 1 € e 1000 €, ou deixa vazio.";
+    cents = Math.round(value * 100);
+  }
+  await setPrice(slug, cents, user.id);
+  await audit(user.id, "preco.alterar", slug, { euros: cents === null ? null : cents / 100 });
+  revalidatePath("/backoffice/precos");
+  return "ok";
 }

@@ -10,7 +10,9 @@ import * as schema from "./schema";
 
 export type Db = NeonHttpDatabase<typeof schema>;
 
-let db: Promise<Db> | undefined;
+// Partilhada por todo o processo: o Next carrega este módulo em separado para páginas e para
+// rotas de API, e duas instâncias do PGlite na mesma pasta não veem as escritas uma da outra.
+const shared = globalThis as typeof globalThis & { __filipaDb?: Promise<Db> };
 
 async function connect(): Promise<Db> {
   const url = process.env.DATABASE_URL;
@@ -27,8 +29,8 @@ async function connect(): Promise<Db> {
 }
 
 export function getDb() {
-  db ??= connect();
-  return db;
+  shared.__filipaDb ??= connect();
+  return shared.__filipaDb;
 }
 
 export { schema };

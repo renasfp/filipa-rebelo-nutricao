@@ -113,3 +113,26 @@ export const reminderLog = pgTable(
   },
   (t) => [index("reminder_log_at_idx").on(t.at)],
 );
+
+/** Cópia da agenda do Nutrium enviada pela extensão do Chrome (o site não acede ao Nutrium). */
+export const nutriumAppointments = pgTable(
+  "nutrium_appointments",
+  {
+    /** Id da consulta no Nutrium. */
+    id: text("id").primaryKey(),
+    start: timestamp("start", { withTimezone: true }).notNull(),
+    end: timestamp("end", { withTimezone: true }).notNull(),
+    patientName: text("patient_name").notNull(),
+    /** scheduling_status_id: 0 confirmada, 1 não confirmada, 2 cancelada. */
+    status: integer("status").notNull(),
+    receivedAt: timestamp("received_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("nutrium_appointments_start_idx").on(t.start)],
+);
+
+/** Valores soltos do site (ex.: quando chegou a última agenda do Nutrium). */
+export const appState = pgTable("app_state", {
+  key: text("key").primaryKey(),
+  value: jsonb("value").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});

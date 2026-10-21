@@ -9,6 +9,9 @@ const DEFAULTS = {
 };
 const AUTO_SYNC_MINUTES = 10;
 const AGENDA_DAYS = 90;
+// Janela da agenda do Nutrium enviada ao site (para a agenda do backoffice).
+const SHARE_PAST_DAYS = 35;
+const SHARE_FUTURE_DAYS = 120;
 const NUTRIUM_TABS = "https://*.nutrium.com/*";
 // scheduling_status_id no Nutrium.
 const N_CONFIRMED = 0;
@@ -207,10 +210,25 @@ async function sync({ tabId } = {}) {
       }
     }
 
+    const shareFrom = new Date(Date.now() - SHARE_PAST_DAYS * 86400000).toISOString();
+    const shareTo = new Date(Date.now() + SHARE_FUTURE_DAYS * 86400000).toISOString();
+    const appointments = await inNutrium(tabId, "listAppointments", shareFrom, shareTo);
+    // O backoffice mostra a agenda do Nutrium junto com o Cal.com.
+    await api(s, "/api/nutrium/agenda", {
+      method: "POST",
+      body: JSON.stringify({ from: shareFrom, to: shareTo, appointments }),
+    });
     const from = new Date(Date.now() - 86400000).toISOString();
-    const to = new Date(Date.now() + AGENDA_DAYS * 86400000).toISOString();
-    const appointments = await inNutrium(tabId, "listAppointments", from, to);
-    agenda = buildAgenda(bookings, appointments, results, from);
+    const to = new Date(Date.now() + AGENDA_DAYS * 86400000).getTime();
+    agenda = buildAgenda(
+      bookings,
+      appointments.filter((a) => {
+        const t = new Date(a.start).getTime();
+        return t >= new Date(from).getTime() && t < to;
+      }),
+      results,
+      from,
+    );
   } catch (err) {
     error = err.message;
   }

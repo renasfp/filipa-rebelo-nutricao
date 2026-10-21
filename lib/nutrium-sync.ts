@@ -1,4 +1,5 @@
 import { createHash, timingSafeEqual } from "crypto";
+import { and, eq, gte, lt, lte, sql } from "drizzle-orm";
 import {
   cancelBooking,
   confirmBooking,
@@ -111,9 +112,13 @@ async function syncStates(): Promise<Record<string, SyncState>> {
 }
 
 /** Marcações desde há uma semana, com o estado da última sincronização de cada uma. */
-export async function listSyncBookings(): Promise<SyncBooking[]> {
-  const since = new Date(Date.now() - LOOKBACK_DAYS * 86400000);
-  const [bookings, types, state] = await Promise.all([listBookings(since), listEventTypes(), syncStates()]);
+export function listSyncBookings(): Promise<SyncBooking[]> {
+  return listSyncBookingsBetween(new Date(Date.now() - LOOKBACK_DAYS * 86400000));
+}
+
+/** Marcações num intervalo (ex.: a semana ou o mês da agenda do backoffice). */
+export async function listSyncBookingsBetween(from: Date, to?: Date): Promise<SyncBooking[]> {
+  const [bookings, types, state] = await Promise.all([listBookings(from, to), listEventTypes(), syncStates()]);
   const titles = new Map(types.map((t) => [t.slug, t.title]));
   return bookings.map((b) => normalize(b, titles, state[b.uid]));
 }
@@ -149,4 +154,78 @@ export async function applyFromNutrium(uid: string, action: CalAction, start?: D
     await markSynced(b.uid, { nutriumId, patientId, version: b.version });
   }
   return after.find((b) => b.uid === newUid) ?? null;
+}
+
+// ─── Agenda do Nutrium (enviada pela extensão) ───────────────────────────────
+
+const AGENDA_STATE_KEY = "nutrium-agenda";
+
+export interface NutriumAppointment {
+  id: string;
+  start: string;
+  end: string;
+  nome: string;
+  /** 0 confirmada, 1 não confirmada, 2 cancelada. */
+  status: number;
+}
+
+/** Substitui a cópia da agenda do Nutrium no intervalo [from, to] pelo que a extensão leu. */
+export async function saveNutriumAgenda(from: Date, to: Date, appointments: NutriumAppointment[]) {
+  const db = await getDb();
+  const t = schema.nutriumAppointments;
+  await db.delete(t).where(and(gte(t.start, from), lte(t.start, to)));
+  if (appointments.length) {
+    await db
+      .insert(t)
+      .values(
+        appointments.map((a) => ({
+          id: a.id,
+          start: new Date(a.start),
+          end: new Date(a.end),
+          patientName: a.nome,
+          status: a.status,
+        })),
+      )
+      .onConflictDoUpdate({
+        target: t.id,
+        set: {
+          start: sql`excluded.start`,
+          end: sql`excluded.end`,
+          patientName: sql`excluded.patient_name`,
+          status: sql`excluded.status`,
+          receivedAt: sql`now()`,
+        },
+      });
+  }
+  const value = { from: from.toISOString(), to: to.toISOString(), count: appointments.length };
+  await db
+    .insert(schema.appState)
+    .values({ key: AGENDA_STATE_KEY, value })
+    .onConflictDoUpdate({ target: schema.appState.key, set: { value, updatedAt: new Date() } });
+}
+
+export async function nutriumAgendaBetween(from: Date, to: Date): Promise<NutriumAppointment[]> {
+  const db = await getDb();
+  const t = schema.nutriumAppointments;
+  const rows = await db
+    .select()
+    .from(t)
+    .where(and(gte(t.start, from), lt(t.start, to)));
+  return rows.map((r) => ({
+    id: r.id,
+    start: r.start.toISOString(),
+    end: r.end.toISOString(),
+    nome: r.patientName,
+    status: r.status,
+  }));
+}
+
+/** Quando chegou a última agenda do Nutrium (null se nunca). */
+export async function nutriumAgendaUpdatedAt(): Promise<Date | null> {
+  const db = await getDb();
+  const [row] = await db
+    .select({ updatedAt: schema.appState.updatedAt })
+    .from(schema.appState)
+    .where(eq(schema.appState.key, AGENDA_STATE_KEY));
+  return row?.updatedAt ?? null;
 }

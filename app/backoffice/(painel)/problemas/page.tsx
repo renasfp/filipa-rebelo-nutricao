@@ -34,7 +34,7 @@ export default async function ProblemsPage() {
             <strong>{p.title}</strong>
             <p className="bo-muted bo-small">{p.detail}</p>
             {p.uid && p.title.startsWith("Por confirmar") && (
-              <Link className="bo-small" href="/backoffice?ver=pendentes">
+              <Link className="bo-small" href="/backoffice?vista=pendentes">
                 Abrir na agenda →
               </Link>
             )}

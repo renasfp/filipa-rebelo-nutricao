@@ -15,6 +15,13 @@
       "when": 1792617534966,
       "tag": "0001_estado_operacional",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792618391366,
+      "tag": "0002_agenda_nutrium",
+      "breakpoints": true
     }
   ]
 }

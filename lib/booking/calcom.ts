@@ -119,13 +119,14 @@ export async function getFreeSlots(eventTypeId: number, from: string, to: string
   return new Map(Object.entries(data ?? {}).map(([date, slots]) => [date, slots.map((s) => s.start.slice(11, 16))]));
 }
 
-/** Todas as marcações (qualquer estado) que começam depois de `afterStart`. Exige API key. */
-export async function listBookings(afterStart: Date): Promise<CalBookingDetails[]> {
+/** Todas as marcações (qualquer estado) que começam depois de `afterStart` (e acabam antes de `beforeEnd`). Exige API key. */
+export async function listBookings(afterStart: Date, beforeEnd?: Date): Promise<CalBookingDetails[]> {
   const bookings: CalBookingDetails[] = [];
   for (let skip = 0; ; skip += 100) {
     const params = new URLSearchParams({
       status: "upcoming,unconfirmed,past,cancelled",
       afterStart: afterStart.toISOString(),
+      ...(beforeEnd && { beforeEnd: beforeEnd.toISOString() }),
       sortStart: "asc",
       take: "100",
       skip: String(skip),

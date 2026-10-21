@@ -407,3 +407,219 @@ details.bo-details summary {
     align-items: flex-start;
   }
 }
+
+/* ─── Agenda: dia / semana / mês ─── */
+.bo {
+  --bo-src-cal: #46679a;
+  --bo-src-cal-pale: #e3eaf5;
+  --bo-src-ambos: var(--sage-deep);
+  --bo-src-ambos-pale: var(--sage-pale);
+  --bo-src-nutrium: #a8741a;
+  --bo-src-nutrium-pale: #f6ecd9;
+}
+
+.bo-period {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.4rem 0 0.6rem;
+}
+
+.bo-period strong {
+  font-weight: 500;
+  min-width: 10rem;
+  text-align: center;
+}
+
+.bo-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.4rem 0 0.8rem;
+}
+
+.bo-diff {
+  color: var(--bo-alta);
+  font-size: 0.85rem;
+  margin: 0.3rem 0 0.6rem;
+}
+
+.bo-booking time {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.bo-card.bo-src-cal { border-left: 4px solid var(--bo-src-cal); }
+.bo-card.bo-src-ambos { border-left: 4px solid var(--bo-src-ambos); }
+.bo-card.bo-src-nutrium { border-left: 4px solid var(--bo-src-nutrium); }
+
+.bo-chip-src-cal { background: var(--bo-src-cal-pale); color: var(--bo-src-cal); }
+.bo-chip-src-ambos { background: var(--bo-src-ambos-pale); color: var(--bo-src-ambos); }
+.bo-chip-src-nutrium { background: var(--bo-src-nutrium-pale); color: var(--bo-src-nutrium); }
+
+/* Entrada compacta */
+.bo-entry {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  min-width: 0;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  border-radius: 6px;
+  padding: 0.15rem 0.4rem;
+  border-left: 3px solid var(--bo-src-cal);
+  background: var(--bo-src-cal-pale);
+  color: var(--ink);
+}
+
+.bo-entry.bo-src-ambos { border-left-color: var(--bo-src-ambos); background: var(--bo-src-ambos-pale); }
+.bo-entry.bo-src-nutrium { border-left-color: var(--bo-src-nutrium); background: var(--bo-src-nutrium-pale); }
+
+.bo-entry.bo-entry-pending {
+  border-left-style: dashed;
+  background-image: repeating-linear-gradient(135deg, transparent 0 6px, rgba(0, 0, 0, 0.035) 6px 12px);
+}
+
+.bo-legend .bo-entry-pending { background-color: var(--white); border-left-color: var(--stone); }
+
+.bo-entry time {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+
+.bo-entry-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bo-entry-flag {
+  margin-left: auto;
+  color: var(--bo-alta);
+  font-weight: 600;
+}
+
+/* Semana: dias empilhados no telemóvel, 7 colunas no computador */
+.bo-week {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.bo-week-day {
+  background: var(--white);
+  border: 1px solid var(--linen);
+  border-radius: 12px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.bo-week-head {
+  font-size: 0.85rem;
+  color: var(--stone);
+  padding: 0 0.2rem 0.2rem;
+}
+
+.bo-week-head strong {
+  color: var(--ink);
+}
+
+.bo-today {
+  border-color: var(--sage-deep);
+  box-shadow: inset 0 0 0 1px var(--sage-deep);
+}
+
+.bo-week-empty {
+  padding: 0 0.2rem;
+}
+
+/* Mês */
+.bo-month {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.25rem;
+}
+
+.bo-month-weekday {
+  font-size: 0.75rem;
+  color: var(--stone);
+  text-align: center;
+  padding-bottom: 0.2rem;
+}
+
+.bo-month-day {
+  position: relative;
+  min-height: 3.2rem;
+  background: var(--white);
+  border: 1px solid var(--linen);
+  border-radius: 8px;
+  padding: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.bo-month-day.bo-outside {
+  opacity: 0.45;
+}
+
+.bo-month-num {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* No telemóvel o mês mostra só quantas consultas há em cada dia. */
+.bo-month-day .bo-entry,
+.bo-month-day > .bo-small {
+  display: none;
+}
+
+.bo-month-count {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  border-radius: 99px;
+  padding: 0 0.45rem;
+  background: var(--sage-pale);
+  color: var(--sage-deep);
+  font-weight: 600;
+}
+
+@media (min-width: 860px) {
+  .bo-week {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+
+  .bo-week-day {
+    min-height: 12rem;
+  }
+
+  .bo-month-day {
+    min-height: 6.5rem;
+  }
+
+  .bo-month-day .bo-entry,
+  .bo-month-day > .bo-small {
+    display: flex;
+  }
+
+  .bo-month-count {
+    display: none;
+  }
+}
+
+/* Na semana há espaço na vertical: o nome passa para a linha seguinte em vez de ser cortado. */
+.bo-week-day .bo-entry {
+  flex-wrap: wrap;
+  column-gap: 0.35rem;
+  row-gap: 0;
+}
+
+.bo-week-day .bo-entry-name {
+  white-space: normal;
+  overflow: visible;
+}

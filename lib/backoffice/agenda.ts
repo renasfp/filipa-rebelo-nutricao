@@ -1,7 +1,13 @@
 import "server-only";
 import { recentEvents } from "@/lib/calcom-webhook";
 import { addDays, lisbonToUtc, todayInLisbon } from "@/lib/booking/time";
-import { listSyncBookings, type SyncBooking } from "@/lib/nutrium-sync";
+import {
+  listSyncBookings,
+  listSyncBookingsBetween,
+  nutriumAgendaBetween,
+  nutriumAgendaUpdatedAt,
+  type SyncBooking,
+} from "@/lib/nutrium-sync";
 import { reminderLog, reminderMode } from "@/lib/reminders";
 
 // Dados dos ecrãs "Agenda" e "Problemas": marcações do Cal.com com o estado no Nutrium.
@@ -117,3 +123,82 @@ export async function findProblems(isAdmin: boolean): Promise<Problem[]> {
   const order = { alta: 0, media: 1, info: 2 };
   return problems.sort((a, b) => order[a.severity] - order[b.severity]);
 }
+
+// ─── Agenda por dia / semana / mês (Cal.com + Nutrium) ───────────────────────────────
+
+export interface CalendarEntry {
+  key: string;
+  start: string;
+  end: string;
+  nome: string;
+  /** Onde a consulta existe. */
+  source: "cal" | "nutrium" | "ambos";
+  /** Marcação do Cal.com (com o estado no Nutrium), se existir. */
+  booking: AgendaItem | null;
+  /** Estado no Nutrium (0 confirmada, 1 não confirmada, 2 cancelada), se existir lá. */
+  nutriumStatus: number | null;
+  /** Diferença entre o Cal.com e o Nutrium, em linguagem simples. */
+  diff: string | null;
+}
+
+const shortWhen = (iso: string) =>
+  new Date(iso).toLocaleString("pt-PT", {
+    timeZone: "Europe/Lisbon",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+export async function calendarEntries(from: Date, to: Date): Promise<CalendarEntry[]> {
+  const [bookings, appointments] = await Promise.all([
+    listSyncBookingsBetween(from, to),
+    nutriumAgendaBetween(from, to),
+  ]);
+  const byId = new Map(appointments.map((a) => [a.id, a]));
+  const linked = new Set<string>();
+  const entries: CalendarEntry[] = [];
+
+  for (const raw of bookings) {
+    const b: AgendaItem = { ...raw, nutrium: nutriumState(raw) };
+    const a = b.synced ? byId.get(b.synced.nutriumId) : undefined;
+    if (a) linked.add(a.id);
+    const nutriumActive = a && a.status !== 2;
+    if (!isActive(b) && !nutriumActive) continue;
+
+    let diff: string | null = null;
+    if (a && isActive(b)) {
+      if (a.status === 2) diff = "Cancelada no Nutrium, ativa no Cal.com";
+      else if (new Date(a.start).getTime() !== new Date(b.start).getTime()) diff = `No Nutrium está às ${shortWhen(a.start)}`;
+    } else if (a && !isActive(b)) {
+      diff = `${b.status === "recusada" ? "Recusada" : "Cancelada"} no Cal.com, ativa no Nutrium`;
+    }
+    entries.push({
+      key: b.uid,
+      start: b.start,
+      end: b.end,
+      nome: b.nome,
+      source: a ? "ambos" : "cal",
+      booking: b,
+      nutriumStatus: a?.status ?? null,
+      diff,
+    });
+  }
+
+  for (const a of appointments) {
+    if (linked.has(a.id) || a.status === 2) continue;
+    entries.push({
+      key: `n${a.id}`,
+      start: a.start,
+      end: a.end,
+      nome: a.nome,
+      source: "nutrium",
+      booking: null,
+      nutriumStatus: a.status,
+      diff: null,
+    });
+  }
+  return entries.sort((x, y) => x.start.localeCompare(y.start) || x.nome.localeCompare(y.nome));
+}
+
+export { nutriumAgendaUpdatedAt };
